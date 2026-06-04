@@ -64,6 +64,11 @@ class Subdomain extends Model
         'error_message' => 'nullable|string',
     ];
 
+    public function getRouteKeyName(): string
+    {
+        return $this->getKeyName();
+    }
+
     public function server(): BelongsTo
     {
         return $this->belongsTo(Server::class);
