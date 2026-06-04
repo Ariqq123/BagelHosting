@@ -80,6 +80,12 @@ Route::group([
         Route::delete('/{database}', [Client\Servers\DatabaseController::class, 'delete']);
     });
 
+    Route::group(['prefix' => '/subdomains'], function () {
+        Route::get('/', [Client\Servers\SubdomainController::class, 'index']);
+        Route::post('/', [Client\Servers\SubdomainController::class, 'store']);
+        Route::delete('/{subdomain}', [Client\Servers\SubdomainController::class, 'delete']);
+    });
+
     Route::group(['prefix' => '/files'], function () {
         Route::get('/list', [Client\Servers\FileController::class, 'directory']);
         Route::get('/contents', [Client\Servers\FileController::class, 'contents']);
