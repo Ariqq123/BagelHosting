@@ -5,14 +5,14 @@ import tw from 'twin.macro';
 const Table = styled.table`
     ${tw`w-full`};
 
-    & > tr{
+    & > tbody > tr {
         & > th {
             ${tw`text-gray-300 font-normal text-left py-2 px-3 whitespace-nowrap`};
 
-            &:first-of-type{
+            &:first-of-type {
                 ${tw`pl-6`};
             }
-            &:last-of-type{
+            &:last-of-type {
                 ${tw`pr-6`};
             }
         }
@@ -20,29 +20,28 @@ const Table = styled.table`
         & > td {
             ${tw`border-t border-gray-600 py-3 px-3 whitespace-nowrap`};
 
-            &:first-of-type{
+            &:first-of-type {
                 ${tw`pl-6`};
             }
-            &:last-of-type{
+            &:last-of-type {
                 ${tw`pr-6`};
             }
         }
     }
 `;
 
-interface Props{
+interface Props {
     children: React.ReactNode;
 }
 
 const TableList = ({ children }: Props) => {
-
-    return(
+    return (
         <div className={'w-full overflow-x-auto'}>
             <Table>
-                {children}
+                <tbody>{children}</tbody>
             </Table>
         </div>
-    )
-}
+    );
+};
 
 export default TableList;
