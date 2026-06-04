@@ -40,7 +40,7 @@ class SubdomainDomainFormRequest extends AdminFormRequest
         });
     }
 
-    public function normalize(): array
+    public function normalize(?array $only = null): array
     {
         $data = $this->validated();
 
