@@ -6,6 +6,7 @@ return [
     'enter-name-uuid-allocation' => 'Enter a server name, uuid, or allocation to begin searching.',
     'at-least-three-characters' => 'Please enter at least three characters to begin searching.',
     'select-a-server' => 'Select a server',
+    'loading' => 'Loading',
     'no-servers' => 'No servers',
     'supportcenter' => 'Support center',
 

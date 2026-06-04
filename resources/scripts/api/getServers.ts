@@ -4,6 +4,7 @@ import http, { getPaginationSet, PaginatedResult } from '@/api/http';
 interface QueryParams {
     query?: string;
     page?: number;
+    per_page?: number;
     type?: string;
 }
 
