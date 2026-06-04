@@ -8,7 +8,9 @@ use Prologue\Alerts\AlertsMessageBag;
 use Pterodactyl\Models\SubdomainDomain;
 use Pterodactyl\Http\Controllers\Controller;
 use Pterodactyl\Exceptions\DisplayException;
+use Pterodactyl\Services\Subdomains\CloudflareDnsService;
 use Pterodactyl\Http\Requests\Admin\SubdomainDomainFormRequest;
+use Pterodactyl\Http\Requests\Admin\ImportSubdomainDomainsRequest;
 
 class SubdomainDomainController extends Controller
 {
@@ -46,6 +48,52 @@ class SubdomainDomainController extends Controller
         $this->alert->success('Subdomain domain was created successfully.')->flash();
 
         return redirect()->route('admin.subdomains.edit', $domain->id);
+    }
+
+    public function previewImport(ImportSubdomainDomainsRequest $request, CloudflareDnsService $cloudflare): View
+    {
+        $zones = collect($cloudflare->listZones($request->input('cloudflare_token')))
+            ->sortBy('name')
+            ->values();
+
+        return view('admin.subdomains.index', [
+            'domains' => SubdomainDomain::query()->withCount('subdomains')->orderBy('name')->get(),
+            'importToken' => $request->input('cloudflare_token'),
+            'importZones' => $zones,
+            'existingDomainNames' => SubdomainDomain::query()->pluck('name')->all(),
+        ]);
+    }
+
+    public function import(ImportSubdomainDomainsRequest $request): RedirectResponse
+    {
+        $created = 0;
+
+        foreach ($request->input('zones', []) as $zone) {
+            if (empty($zone['selected'])) {
+                continue;
+            }
+
+            $name = strtolower($zone['name']);
+            $domain = SubdomainDomain::query()->firstOrNew(['name' => $name]);
+            if ($domain->exists) {
+                continue;
+            }
+
+            $domain->forceFill([
+                'cloudflare_zone_id' => $zone['id'],
+                'cloudflare_token' => $request->input('cloudflare_token'),
+                'allowed_record_types' => ['A'],
+                'cname_target' => null,
+                'proxied' => false,
+                'enabled' => true,
+            ])->save();
+
+            ++$created;
+        }
+
+        $this->alert->success(sprintf('Imported %d Cloudflare domain%s.', $created, $created === 1 ? '' : 's'))->flash();
+
+        return redirect()->route('admin.subdomains');
     }
 
     public function edit(SubdomainDomain $domain): View

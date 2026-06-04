@@ -14,6 +14,43 @@ class CloudflareDnsService
     /**
      * @throws DisplayException
      */
+    public function listZones(string $token): array
+    {
+        $zones = [];
+        $page = 1;
+
+        do {
+            $response = Http::withToken($token)
+                ->acceptJson()
+                ->get(sprintf('%s/zones', self::BASE_URL), [
+                    'page' => $page,
+                    'per_page' => 50,
+                ]);
+
+            $payload = $response->json() ?? [];
+            if (!$response->successful() || !Arr::get($payload, 'success')) {
+                throw new DisplayException($this->getErrorMessage($payload, 'Cloudflare failed to list zones.'));
+            }
+
+            foreach (Arr::get($payload, 'result', []) as $zone) {
+                if (is_array($zone) && !empty($zone['id']) && !empty($zone['name'])) {
+                    $zones[] = [
+                        'id' => $zone['id'],
+                        'name' => $zone['name'],
+                    ];
+                }
+            }
+
+            $totalPages = (int) Arr::get($payload, 'result_info.total_pages', 1);
+            ++$page;
+        } while ($page <= $totalPages);
+
+        return $zones;
+    }
+
+    /**
+     * @throws DisplayException
+     */
     public function createRecord(SubdomainDomain $domain, string $type, string $fqdn, string $content, bool $proxied): string
     {
         $response = Http::withToken($domain->cloudflare_token)
