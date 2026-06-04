@@ -60,7 +60,17 @@ class ServerDeletionService
 
         $this->connection->transaction(function () use ($server) {
             foreach ($server->subdomains as $subdomain) {
-                $this->subdomainManagementService->delete($subdomain);
+                try {
+                    $this->subdomainManagementService->delete($subdomain);
+                } catch (\Exception $exception) {
+                    if (!$this->force) {
+                        throw $exception;
+                    }
+
+                    $subdomain->delete();
+
+                    Log::warning($exception);
+                }
             }
 
             foreach ($server->databases as $database) {
