@@ -44,6 +44,7 @@ Route::group(['prefix' => 'arix'], function () {
 
     Route::get('/plugins', [Admin\Arix\ArixPluginsController::class, 'index'])->name('admin.arix.plugins');
     Route::post('/plugins', [Admin\Arix\ArixPluginsController::class, 'store']);
+    Route::patch('/plugins/settings', [Admin\Arix\ArixPluginsController::class, 'updateSettings'])->name('admin.arix.plugins.settings');
     Route::patch('/plugins/{plugin:id}', [Admin\Arix\ArixPluginsController::class, 'update'])->name('admin.arix.plugins.update');
     Route::delete('/plugins/{plugin:id}', [Admin\Arix\ArixPluginsController::class, 'delete'])->name('admin.arix.plugins.delete');
 });

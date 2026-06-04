@@ -19,6 +19,39 @@
             </div>
         @endif
 
+        <form action="{{ route('admin.arix.plugins.settings') }}" method="POST">
+            @csrf
+            @method('PATCH')
+            <div class="row" style="border-bottom:1px solid var(--gray500);padding-top:20px;padding-bottom:20px;">
+                <div class="col-md-4">
+                    <p style="margin:0;font-weight:550;">Marketplace settings</p>
+                    <span style="font-size:1.5rem;color:var(--gray300);">Manage external provider credentials.</span>
+                </div>
+                <div class="col-md-8">
+                    <label style="display:block;margin-bottom:8px;color:var(--gray200);">CurseForge API key</label>
+                    <div class="input-field">
+                        <input
+                            name="curseforge_api_key"
+                            type="password"
+                            value=""
+                            placeholder="{{ $curseforgeConfigured ? 'Configured - leave blank to keep current key' : 'Paste CurseForge API key' }}"
+                            autocomplete="new-password"
+                        >
+                    </div>
+                    <p style="font-size:1.4rem;color:var(--gray300);margin-top:8px;">
+                        Status: {{ $curseforgeConfigured ? 'Configured' : 'Not configured' }}
+                    </p>
+                    @if($curseforgeConfigured)
+                        <label style="display:flex;align-items:center;gap:8px;margin:12px 0;">
+                            <input type="checkbox" name="clear_curseforge_api_key" value="1">
+                            Remove saved CurseForge key
+                        </label>
+                    @endif
+                    <button type="submit" class="btn btn-primary">Save settings</button>
+                </div>
+            </div>
+        </form>
+
         <form action="{{ route('admin.arix.plugins') }}" method="POST">
             @csrf
             <div class="row" style="border-bottom:1px solid var(--gray500);padding-top:20px;padding-bottom:20px;">
