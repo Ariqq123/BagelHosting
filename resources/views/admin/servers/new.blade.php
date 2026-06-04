@@ -130,6 +130,13 @@
                         </div>
                         <p class="text-muted small">The total number of backups that can be created for this server.</p>
                     </div>
+                    <div class="form-group col-xs-6">
+                        <label for="pSubdomainLimit" class="control-label">Subdomain Limit</label>
+                        <div>
+                            <input type="text" id="pSubdomainLimit" name="subdomain_limit" class="form-control" value="{{ old('subdomain_limit', 0) }}"/>
+                        </div>
+                        <p class="text-muted small">The total number of subdomains that can be created for this server.</p>
+                    </div>
                 </div>
             </div>
         </div>
