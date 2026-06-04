@@ -34,6 +34,17 @@ import {
 const FileEditContainer = lazy(() => import('@/components/server/files/FileEditContainer'));
 const ScheduleEditContainer = lazy(() => import('@/components/server/schedules/ScheduleEditContainer'));
 
+const SubdomainsIcon = (props: React.SVGProps<SVGSVGElement>) =>
+    React.createElement(
+        'svg',
+        { fill: 'none', viewBox: '0 0 24 24', stroke: 'currentColor', ...props },
+        React.createElement('path', {
+            strokeLinecap: 'round',
+            strokeLinejoin: 'round',
+            d: 'M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9',
+        })
+    );
+
 /*
  * Arix Theme keeps server navigation data-driven here; add addon tabs by
  * importing the component and icon, then adding a route definition below.
@@ -163,7 +174,7 @@ export default {
                 path: '/subdomains',
                 permission: 'subdomain.*',
                 name: 'subdomains',
-                icon: GlobeIcon,
+                icon: SubdomainsIcon,
                 component: SubdomainsContainer,
             },
             {
