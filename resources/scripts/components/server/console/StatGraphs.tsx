@@ -41,8 +41,8 @@ export default () => {
             return {
                 ...opts,
                 label: !index ? 'Network In' : 'Network Out',
-                borderColor: !index ? theme('colors.cyan.400') : theme('colors.yellow.400'),
-                backgroundColor: hexToRgba(!index ? theme('colors.cyan.700') : theme('colors.yellow.700'), 0.5),
+                borderColor: !index ? theme('colors.yellow.400') : theme('colors.cyan.400'),
+                backgroundColor: hexToRgba(!index ? theme('colors.yellow.700') : theme('colors.cyan.700'), 0.5),
             };
         },
     });
@@ -72,8 +72,8 @@ export default () => {
         cpu.pushSmooth(values.cpu_absolute);
         memory.pushSmooth(Math.floor(values.memory_bytes / 1024 / 1024));
         network.pushSmooth([
-            previous.current.tx < 0 ? 0 : Math.max(0, values.network.tx_bytes - previous.current.tx),
             previous.current.rx < 0 ? 0 : Math.max(0, values.network.rx_bytes - previous.current.rx),
+            previous.current.tx < 0 ? 0 : Math.max(0, values.network.tx_bytes - previous.current.tx),
         ]);
 
         previous.current = { tx: values.network.tx_bytes, rx: values.network.rx_bytes };

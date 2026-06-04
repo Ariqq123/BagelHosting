@@ -136,7 +136,12 @@ function useChart(label: string, opts?: UseChartOptions) {
         typeof opts?.options === 'number' ? { scales: { y: { min: 0, suggestedMax: opts.options } } } : opts?.options
     );
     const [data, setData] = useState(getEmptyData(label, opts?.sets || 1, opts?.callback));
+    const dataRef = useRef(data);
     const animationFrame = useRef<number | null>(null);
+
+    useEffect(() => {
+        dataRef.current = data;
+    }, [data]);
 
     const cancelAnimation = () => {
         if (animationFrame.current !== null) {
@@ -150,46 +155,52 @@ function useChart(label: string, opts?: UseChartOptions) {
     const push = (items: number | null | (number | null)[]) => {
         cancelAnimation();
 
-        setData((state) =>
-            merge(state, {
+        setData((state) => {
+            const next = merge(state, {
                 datasets: (Array.isArray(items) ? items : [items]).map((item, index) => ({
                     ...state.datasets[index],
                     data: state.datasets[index].data
                         .slice(1)
                         .concat(typeof item === 'number' ? Number(item.toFixed(2)) : item),
                 })),
-            })
-        );
+            });
+
+            dataRef.current = next;
+
+            return next;
+        });
     };
 
     const pushSmooth = (items: number | null | (number | null)[], duration = 900) => {
         cancelAnimation();
 
         const targets = Array.isArray(items) ? items : [items];
-        let starts: (number | null)[] = [];
+        const starts = targets.map((item, index) => {
+            const previous = dataRef.current.datasets[index].data[dataRef.current.datasets[index].data.length - 1];
+
+            return typeof previous === 'number' && previous >= 0 ? previous : item;
+        });
         const startedAt = performance.now();
 
-        setData((state) =>
-            merge(state, {
-                datasets: targets.map((item, index) => {
-                    const previous = state.datasets[index].data[state.datasets[index].data.length - 1];
-                    const start = typeof previous === 'number' && previous >= 0 ? previous : item;
-                    starts[index] = typeof start === 'number' ? start : item;
+        setData((state) => {
+            const next = merge(state, {
+                datasets: targets.map((_, index) => ({
+                    ...state.datasets[index],
+                    data: state.datasets[index].data.slice(1).concat(starts[index]),
+                })),
+            });
 
-                    return {
-                        ...state.datasets[index],
-                        data: state.datasets[index].data.slice(1).concat(starts[index]),
-                    };
-                }),
-            })
-        );
+            dataRef.current = next;
+
+            return next;
+        });
 
         const tick = (now: number) => {
             const progress = Math.min(1, (now - startedAt) / duration);
             const eased = 1 - Math.pow(1 - progress, 3);
 
-            setData((state) =>
-                merge(state, {
+            setData((state) => {
+                const next = merge(state, {
                     datasets: targets.map((target, index) => {
                         const data = [...state.datasets[index].data];
                         const start = starts[index];
@@ -205,8 +216,12 @@ function useChart(label: string, opts?: UseChartOptions) {
                             data,
                         };
                     }),
-                })
-            );
+                });
+
+                dataRef.current = next;
+
+                return next;
+            });
 
             if (progress < 1) {
                 animationFrame.current = requestAnimationFrame(tick);
@@ -221,14 +236,18 @@ function useChart(label: string, opts?: UseChartOptions) {
     const clear = () => {
         cancelAnimation();
 
-        setData((state) =>
-            merge(state, {
+        setData((state) => {
+            const next = merge(state, {
                 datasets: state.datasets.map((value) => ({
                     ...value,
                     data: Array(20).fill(-5),
                 })),
-            })
-        );
+            });
+
+            dataRef.current = next;
+
+            return next;
+        });
     };
 
     return { props: { data, options }, push, pushSmooth, clear };
