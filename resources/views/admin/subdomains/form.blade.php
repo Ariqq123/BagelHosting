@@ -52,6 +52,9 @@
                     <div class="form-group">
                         <label for="pCnameTarget" class="control-label">CNAME Target</label>
                         <input type="text" id="pCnameTarget" name="cname_target" class="form-control" value="{{ old('cname_target', $domain->cname_target) }}" placeholder="node.example.com" />
+                        <p class="text-muted small">
+                            Required only when CNAME records are enabled. New user subdomains will point to this hostname, for example <code>node.example.com</code>. Use a hostname, not an IP address or URL.
+                        </p>
                     </div>
                     <div class="checkbox checkbox-primary">
                         <input id="pProxied" type="checkbox" name="proxied" value="1" @if(old('proxied', $domain->proxied)) checked @endif />
