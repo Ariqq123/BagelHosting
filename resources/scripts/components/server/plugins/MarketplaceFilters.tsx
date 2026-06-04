@@ -51,6 +51,11 @@ const LOADERS = [
     'fabric',
 ];
 
+const PLATFORMS: MarketplacePlatform[] = ['modrinth', 'spiget', 'hangar', 'curseforge'];
+
+const platformLabel = (platform: MarketplacePlatform): string =>
+    ({ modrinth: 'Modrinth', spiget: 'Spigot', hangar: 'Hangar', curseforge: 'CurseForge' }[platform]);
+
 interface Props {
     platform: MarketplacePlatform;
     version: string;
@@ -113,7 +118,7 @@ export default ({
                 <div className={'mb-4'}>
                     <p className={'font-medium text-gray-100'}>Filters</p>
                     <p className={'text-xs text-gray-400'}>
-                        {[platform === 'spiget' ? 'Spigot' : 'Modrinth', version || 'All versions'].join(' · ')}
+                        {[platformLabel(platform), version || 'All versions'].join(' · ')}
                     </p>
                 </div>
             ) : (
@@ -126,7 +131,7 @@ export default ({
                         <span>
                             <span className={'block font-medium text-gray-100'}>Filters</span>
                             <span className={'block text-xs text-gray-400'}>
-                                {[platform === 'spiget' ? 'Spigot' : 'Modrinth', version || 'All versions'].join(' · ')}
+                                {[platformLabel(platform), version || 'All versions'].join(' · ')}
                             </span>
                         </span>
                         <MobileIcon className={'w-5 text-gray-300 flex-shrink-0'} />
@@ -136,7 +141,7 @@ export default ({
             )}
             <div className={sheet || mobileOpen ? 'space-y-4 mt-4 xl:mt-0' : 'hidden xl:block xl:space-y-4'}>
                 <div className={'grid grid-cols-2 gap-2'}>
-                    {(['modrinth', 'spiget'] as MarketplacePlatform[]).map((item) => (
+                    {PLATFORMS.map((item) => (
                         <label
                             key={item}
                             className={
@@ -144,7 +149,7 @@ export default ({
                             }
                         >
                             <Input type={'radio'} checked={platform === item} onChange={() => onPlatformChange(item)} />
-                            {item === 'spiget' ? 'Spigot' : 'Modrinth'}
+                            {platformLabel(item)}
                         </label>
                     ))}
                 </div>
@@ -205,7 +210,10 @@ export default ({
                     </div>
                 </div>
 
-                <FilterSection title={'Loader'} summary={platform === 'modrinth' ? loader : 'Modrinth only'}>
+                <FilterSection
+                    title={'Loader'}
+                    summary={['modrinth', 'hangar'].includes(platform) ? loader : 'Modrinth/Hangar only'}
+                >
                     <div className={'grid grid-cols-2 gap-2'}>
                         {LOADERS.map((item) => (
                             <label
@@ -217,7 +225,7 @@ export default ({
                                 <Input
                                     type={'radio'}
                                     checked={loader === item}
-                                    disabled={platform !== 'modrinth'}
+                                    disabled={!['modrinth', 'hangar'].includes(platform)}
                                     onChange={() => onLoaderChange(item)}
                                 />
                                 {item}

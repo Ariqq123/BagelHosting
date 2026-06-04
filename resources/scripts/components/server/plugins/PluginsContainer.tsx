@@ -65,6 +65,7 @@ export default () => {
 
     const installedFiles = useMemo(() => installedPlugins.map((plugin) => plugin.filename), [installedPlugins]);
     const installedSet = useMemo(() => new Set(installedFiles.map(installedKey)), [installedFiles]);
+    const platformUsesLoader = ['modrinth', 'hangar'].includes(platform);
 
     const refreshInstalled = () => {
         getInstalledPlugins(uuid)
@@ -81,7 +82,7 @@ export default () => {
             query: searchQuery,
             page: searchPage,
             version,
-            loader: platform === 'modrinth' ? loader : '',
+            loader: platformUsesLoader ? loader : '',
         })
             .then((response) => setPlugins(response.data))
             .catch((error) => clearAndAddHttpError({ key: 'plugins', error }))
@@ -119,7 +120,13 @@ export default () => {
         setVersions([]);
         setVersionsLoading(true);
         clearFlashes('plugins');
-        getMarketplaceVersions(uuid, plugin.platform, plugin.id, version, plugin.platform === 'modrinth' ? loader : '')
+        getMarketplaceVersions(
+            uuid,
+            plugin.platform,
+            plugin.id,
+            version,
+            ['modrinth', 'hangar'].includes(plugin.platform) ? loader : ''
+        )
             .then(setVersions)
             .catch((error) => clearAndAddHttpError({ key: 'plugins', error }))
             .then(() => setVersionsLoading(false));
@@ -134,7 +141,7 @@ export default () => {
             plugin.id,
             null,
             version,
-            plugin.platform === 'modrinth' ? loader : ''
+            ['modrinth', 'hangar'].includes(plugin.platform) ? loader : ''
         )
             .then(({ filename }) => {
                 addFlash({
@@ -158,7 +165,7 @@ export default () => {
             plugin.id,
             item.id,
             version,
-            plugin.platform === 'modrinth' ? loader : ''
+            ['modrinth', 'hangar'].includes(plugin.platform) ? loader : ''
         )
             .then(({ filename }) => {
                 addFlash({
@@ -271,7 +278,7 @@ export default () => {
                                 [
                                     version,
                                     platform !== 'modrinth' ? platform : '',
-                                    loader !== 'paper' ? loader : '',
+                                    platformUsesLoader && loader !== 'paper' ? loader : '',
                                 ].filter(Boolean).length
                             }
                             onQueryChange={setQuery}

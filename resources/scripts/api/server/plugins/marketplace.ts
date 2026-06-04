@@ -1,6 +1,6 @@
 import http from '@/api/http';
 
-export type MarketplacePlatform = 'modrinth' | 'spiget';
+export type MarketplacePlatform = 'modrinth' | 'spiget' | 'hangar' | 'curseforge';
 
 export interface MarketplacePlugin {
     platform: MarketplacePlatform;
