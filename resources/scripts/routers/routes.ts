@@ -7,6 +7,7 @@ import ScheduleContainer from '@/components/server/schedules/ScheduleContainer';
 import UsersContainer from '@/components/server/users/UsersContainer';
 import BackupContainer from '@/components/server/backups/BackupContainer';
 import NetworkContainer from '@/components/server/network/NetworkContainer';
+import SubdomainsContainer from '@/components/server/subdomains/SubdomainsContainer';
 import StartupContainer from '@/components/server/startup/StartupContainer';
 import FileManagerContainer from '@/components/server/files/FileManagerContainer';
 import PluginsContainer from '@/components/server/plugins/PluginsContainer';
@@ -157,6 +158,13 @@ export default {
                 name: 'network',
                 icon: GlobeIcon,
                 component: NetworkContainer,
+            },
+            {
+                path: '/subdomains',
+                permission: 'subdomain.*',
+                name: 'subdomains',
+                icon: GlobeIcon,
+                component: SubdomainsContainer,
             },
             {
                 path: '/plugins',
