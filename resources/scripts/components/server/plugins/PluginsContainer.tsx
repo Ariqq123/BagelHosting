@@ -3,16 +3,17 @@ import tw from 'twin.macro';
 import FlashMessageRender from '@/components/FlashMessageRender';
 import ServerContentBlock from '@/components/elements/ServerContentBlock';
 import Spinner from '@/components/elements/Spinner';
-import { Button } from '@/components/elements/button/index';
-import Input from '@/components/elements/Input';
-import Select from '@/components/elements/Select';
 import Modal from '@/components/elements/Modal';
+import { Dialog } from '@/components/elements/dialog';
 import { ServerContext } from '@/state/server';
 import useFlash from '@/plugins/useFlash';
-import { httpErrorToHuman } from '@/api/http';
-import getServerPlugins, { ServerPlugin } from '@/api/server/plugins/getServerPlugins';
-import downloadServerPlugin from '@/api/server/plugins/downloadServerPlugin';
-import loadDirectory from '@/api/server/files/loadDirectory';
+import {
+    deleteInstalledPlugin as deleteTrackedInstalledPlugin,
+    getInstalledPlugins,
+    InstalledPlugin,
+    renameInstalledPlugin as renameTrackedInstalledPlugin,
+    updateInstalledPlugin,
+} from '@/api/server/plugins/installed';
 import {
     getMarketplaceVersions,
     installMarketplacePlugin,
@@ -21,30 +22,30 @@ import {
     MarketplaceVersion,
     searchMarketplacePlugins,
 } from '@/api/server/plugins/marketplace';
-import {
-    CloudDownloadIcon,
-    ExternalLinkIcon,
-    PuzzleIcon,
-    SearchIcon,
-    StarIcon,
-    SwitchHorizontalIcon,
-} from '@heroicons/react/outline';
+import { PuzzleIcon } from '@heroicons/react/outline';
 import { useTranslation } from 'react-i18next';
+import { installedKey } from '@/components/server/plugins/utils';
+import SearchToolbar from '@/components/server/plugins/SearchToolbar';
+import InstalledPluginsPanel from '@/components/server/plugins/InstalledPluginsPanel';
+import MarketplaceFilters from '@/components/server/plugins/MarketplaceFilters';
+import MarketplacePluginCard from '@/components/server/plugins/MarketplacePluginCard';
+import MarketplaceVersionModal from '@/components/server/plugins/MarketplaceVersionModal';
+import PaginationControls from '@/components/server/plugins/PaginationControls';
 
-const formatNumber = (value: number): string => new Intl.NumberFormat().format(value);
-const formatDate = (value: string | null): string => (value ? new Date(value).toLocaleDateString() : 'Unknown');
-const installedKey = (value: string): string =>
+const significantNameParts = (value: string): string[] =>
     value
         .toLowerCase()
         .replace(/\.jar$/, '')
-        .replace(/[^a-z0-9]+/g, '');
+        .replace(/[._-]+/g, ' ')
+        .split(/\s+/)
+        .map(installedKey)
+        .filter((part) => part.length >= 4 && !['bukkit', 'paper', 'spigot', 'plugin', 'simple'].includes(part));
 
 export default () => {
     const { t } = useTranslation('arix/server/plugins');
     const uuid = ServerContext.useStoreState((state) => state.server.data!.uuid);
     const { addFlash, clearFlashes, clearAndAddHttpError } = useFlash();
-    const [curated, setCurated] = useState<ServerPlugin[]>([]);
-    const [installedFiles, setInstalledFiles] = useState<string[]>([]);
+    const [installedPlugins, setInstalledPlugins] = useState<InstalledPlugin[]>([]);
     const [query, setQuery] = useState('');
     const [platform, setPlatform] = useState<MarketplacePlatform>('modrinth');
     const [version, setVersion] = useState('');
@@ -53,28 +54,32 @@ export default () => {
     const [plugins, setPlugins] = useState<MarketplacePlugin[]>([]);
     const [loading, setLoading] = useState(true);
     const [searching, setSearching] = useState(false);
-    const [downloading, setDownloading] = useState<number | null>(null);
     const [selected, setSelected] = useState<MarketplacePlugin | null>(null);
     const [versions, setVersions] = useState<MarketplaceVersion[]>([]);
     const [versionsLoading, setVersionsLoading] = useState(false);
     const [installing, setInstalling] = useState<string | null>(null);
-    const [showCurated, setShowCurated] = useState(false);
+    const [fileAction, setFileAction] = useState<string | null>(null);
+    const [pendingDelete, setPendingDelete] = useState<string | null>(null);
+    const [showInstalledMenu, setShowInstalledMenu] = useState(false);
+    const [showMobileFilters, setShowMobileFilters] = useState(false);
 
+    const installedFiles = useMemo(() => installedPlugins.map((plugin) => plugin.filename), [installedPlugins]);
     const installedSet = useMemo(() => new Set(installedFiles.map(installedKey)), [installedFiles]);
 
     const refreshInstalled = () => {
-        loadDirectory(uuid, '/plugins')
-            .then((files) => setInstalledFiles(files.filter((file) => file.isFile).map((file) => file.name)))
-            .catch(() => setInstalledFiles([]));
+        getInstalledPlugins(uuid)
+            .then(setInstalledPlugins)
+            .catch(() => setInstalledPlugins([]));
     };
 
-    const performSearch = () => {
+    const performSearch = (searchPage = page, searchQuery = query) => {
         clearFlashes('plugins');
+
         setSearching(true);
         searchMarketplacePlugins(uuid, {
             platform,
-            query,
-            page,
+            query: searchQuery,
+            page: searchPage,
             version,
             loader: platform === 'modrinth' ? loader : '',
         })
@@ -85,21 +90,29 @@ export default () => {
 
     useEffect(() => {
         clearFlashes('plugins');
-        Promise.all([getServerPlugins(uuid), loadDirectory(uuid, '/plugins').catch(() => [])])
-            .then(([plugins, files]) => {
-                setCurated(plugins);
-                setInstalledFiles(files.filter((file) => file.isFile).map((file) => file.name));
-            })
-            .catch((error) => {
-                console.error(error);
-                addFlash({ key: 'plugins', type: 'error', title: 'Error', message: httpErrorToHuman(error) });
-            })
+        getInstalledPlugins(uuid)
+            .then(setInstalledPlugins)
+            .catch(() => setInstalledPlugins([]))
             .then(() => setLoading(false));
     }, []);
 
     useEffect(() => {
         if (!loading) performSearch();
-    }, [platform, page]);
+    }, [loading, platform, page]);
+
+    useEffect(() => {
+        if (loading) return;
+
+        const timeout = setTimeout(() => {
+            if (page === 1) {
+                performSearch(1);
+            } else {
+                setPage(1);
+            }
+        }, 500);
+
+        return () => clearTimeout(timeout);
+    }, [query]);
 
     const openVersions = (plugin: MarketplacePlugin) => {
         setSelected(plugin);
@@ -110,6 +123,30 @@ export default () => {
             .then(setVersions)
             .catch((error) => clearAndAddHttpError({ key: 'plugins', error }))
             .then(() => setVersionsLoading(false));
+    };
+
+    const installLatest = (plugin: MarketplacePlugin) => {
+        setInstalling(plugin.id);
+        clearFlashes('plugins');
+        installMarketplacePlugin(
+            uuid,
+            plugin.platform,
+            plugin.id,
+            null,
+            version,
+            plugin.platform === 'modrinth' ? loader : ''
+        )
+            .then(({ filename }) => {
+                addFlash({
+                    key: 'plugins',
+                    type: 'success',
+                    title: 'Install started',
+                    message: `${filename} is being pulled into /plugins.`,
+                });
+                refreshInstalled();
+            })
+            .catch((error) => clearAndAddHttpError({ key: 'plugins', error }))
+            .then(() => setInstalling(null));
     };
 
     const installVersion = (plugin: MarketplacePlugin, item: MarketplaceVersion) => {
@@ -137,28 +174,84 @@ export default () => {
             .then(() => setInstalling(null));
     };
 
-    const onDownloadCurated = (plugin: ServerPlugin) => {
+    const marketplaceInstalled = (plugin: MarketplacePlugin): boolean => {
+        if (
+            installedPlugins.some(
+                (item) =>
+                    item.tracked &&
+                    item.platform === plugin.platform &&
+                    !!item.project &&
+                    [plugin.id, plugin.slug].includes(item.project)
+            )
+        ) {
+            return true;
+        }
+
+        const names = [plugin.slug, plugin.name].map(installedKey).filter(Boolean);
+        const nameParts = Array.from(new Set([plugin.slug, plugin.name].flatMap(significantNameParts)));
+
+        return Array.from(installedSet).some(
+            (file) =>
+                names.some((name) => file.includes(name) || name.includes(file)) ||
+                (nameParts.length > 0 && nameParts.every((part) => file.includes(part)))
+        );
+    };
+
+    const requestDeleteInstalledPlugin = (file: string) => {
+        setPendingDelete(file);
+    };
+
+    const deleteInstalledPlugin = () => {
+        if (!pendingDelete) return;
+
+        const file = pendingDelete;
+
+        setFileAction(file);
+        setPendingDelete(null);
         clearFlashes('plugins');
-        setDownloading(plugin.id);
-        downloadServerPlugin(uuid, plugin.id)
+        deleteTrackedInstalledPlugin(uuid, file)
+            .then(() => {
+                addFlash({ key: 'plugins', type: 'success', title: 'Plugin deleted', message: `${file} was deleted.` });
+                refreshInstalled();
+            })
+            .catch((error) => clearAndAddHttpError({ key: 'plugins', error }))
+            .then(() => setFileAction(null));
+    };
+
+    const renameInstalledPlugin = (from: string, to: string) => {
+        setFileAction(from);
+        clearFlashes('plugins');
+        renameTrackedInstalledPlugin(uuid, from, to)
             .then(() => {
                 addFlash({
                     key: 'plugins',
                     type: 'success',
-                    title: t('download-started'),
-                    message: t('download-started-message', { filename: plugin.filename }),
+                    title: 'Plugin renamed',
+                    message: `${from} was renamed to ${to}.`,
                 });
                 refreshInstalled();
             })
             .catch((error) => clearAndAddHttpError({ key: 'plugins', error }))
-            .then(() => setDownloading(null));
+            .then(() => setFileAction(null));
     };
 
-    const marketplaceInstalled = (plugin: MarketplacePlugin): boolean => {
-        const names = [plugin.slug, plugin.name].map(installedKey).filter(Boolean);
-        return names.some((name) =>
-            Array.from(installedSet).some((file) => file.includes(name) || name.includes(file))
-        );
+    const updateInstalled = (file: string) => {
+        setFileAction(file);
+        clearFlashes('plugins');
+        updateInstalledPlugin(uuid, file)
+            .then(({ filename, updated }) => {
+                addFlash({
+                    key: 'plugins',
+                    type: 'success',
+                    title: updated ? 'Plugin update started' : 'Plugin already current',
+                    message: updated
+                        ? `${filename} is being pulled into /plugins.`
+                        : `${file} is already on the latest tracked version.`,
+                });
+                refreshInstalled();
+            })
+            .catch((error) => clearAndAddHttpError({ key: 'plugins', error }))
+            .then(() => setFileAction(null));
     };
 
     return (
@@ -167,73 +260,28 @@ export default () => {
             {loading ? (
                 <Spinner size={'large'} centered />
             ) : (
-                <div className={'grid grid-cols-1 xl:grid-cols-[1fr_18rem] gap-5'}>
+                <div className={'grid grid-cols-1 gap-5'}>
                     <div className={'space-y-5 min-w-0'}>
-                        <div className={'bg-gray-700 rounded-box backdrop p-4'}>
-                            <div className={'flex flex-col md:flex-row gap-3'}>
-                                <div className={'relative flex-1'}>
-                                    <SearchIcon className={'absolute left-3 top-3 w-5 text-gray-400'} />
-                                    <Input
-                                        value={query}
-                                        onChange={(e) => setQuery(e.currentTarget.value)}
-                                        onKeyDown={(e) => e.key === 'Enter' && performSearch()}
-                                        css={tw`pl-10`}
-                                    />
-                                </div>
-                                <Button
-                                    onClick={() => {
-                                        setPage(1);
-                                        performSearch();
-                                    }}
-                                    disabled={searching}
-                                >
-                                    {searching ? 'Searching' : 'Search'}
-                                </Button>
-                                <Button.Text onClick={() => setShowCurated((value) => !value)}>
-                                    <PuzzleIcon className={'w-5 mr-2'} />
-                                    Installed Plugins
-                                </Button.Text>
-                            </div>
-                        </div>
-
-                        {showCurated && (
-                            <div className={'bg-gray-700 rounded-box backdrop p-5'}>
-                                <p className={'font-medium text-gray-100 mb-3'}>Curated Plugins</p>
-                                <div className={'grid gap-3'}>
-                                    {curated.length > 0 ? (
-                                        curated.map((plugin) => (
-                                            <div
-                                                key={plugin.id}
-                                                className={
-                                                    'flex flex-col md:flex-row md:items-center justify-between gap-3 bg-gray-600 rounded-box p-4'
-                                                }
-                                            >
-                                                <div className={'min-w-0'}>
-                                                    <p className={'font-medium text-gray-100 truncate'}>
-                                                        {plugin.name}
-                                                    </p>
-                                                    <p className={'text-sm text-gray-300'}>{plugin.description}</p>
-                                                    <p className={'text-xs text-gray-400 mt-1'}>{plugin.filename}</p>
-                                                </div>
-                                                {installedSet.has(installedKey(plugin.filename)) ? (
-                                                    <span className={'text-sm text-green-300'}>Plugin Installed</span>
-                                                ) : (
-                                                    <Button
-                                                        disabled={downloading !== null}
-                                                        onClick={() => onDownloadCurated(plugin)}
-                                                    >
-                                                        <CloudDownloadIcon className={'w-5 mr-2'} />
-                                                        {downloading === plugin.id ? t('downloading') : t('download')}
-                                                    </Button>
-                                                )}
-                                            </div>
-                                        ))
-                                    ) : (
-                                        <p className={'text-sm text-gray-300'}>{t('no-plugins')}</p>
-                                    )}
-                                </div>
-                            </div>
-                        )}
+                        <SearchToolbar
+                            query={query}
+                            searching={searching}
+                            installedOpen={showInstalledMenu}
+                            installedCount={installedPlugins.length}
+                            filtersActiveCount={
+                                [
+                                    version,
+                                    platform !== 'modrinth' ? platform : '',
+                                    loader !== 'paper' ? loader : '',
+                                ].filter(Boolean).length
+                            }
+                            onQueryChange={setQuery}
+                            onSearch={() => {
+                                setPage(1);
+                                performSearch(1);
+                            }}
+                            onToggleInstalled={() => setShowInstalledMenu(true)}
+                            onOpenFilters={() => setShowMobileFilters(true)}
+                        />
 
                         <div className={'grid grid-cols-1 lg:grid-cols-2 gap-4'}>
                             {searching ? (
@@ -241,82 +289,16 @@ export default () => {
                                     <Spinner centered />
                                 </div>
                             ) : (
-                                plugins.map((plugin) => {
-                                    const isInstalled = marketplaceInstalled(plugin) || plugin.installed;
-                                    return (
-                                        <div
-                                            key={`${plugin.platform}:${plugin.id}`}
-                                            className={
-                                                'bg-gray-700 rounded-box backdrop p-5 flex flex-col gap-4 min-w-0'
-                                            }
-                                        >
-                                            <div className={'flex items-start gap-4 min-w-0'}>
-                                                {plugin.iconUrl ? (
-                                                    <img
-                                                        src={plugin.iconUrl}
-                                                        alt=''
-                                                        className={
-                                                            'w-12 h-12 rounded object-cover bg-gray-600 flex-shrink-0'
-                                                        }
-                                                    />
-                                                ) : (
-                                                    <div
-                                                        className={
-                                                            'w-12 h-12 rounded bg-gray-600 flex items-center justify-center flex-shrink-0'
-                                                        }
-                                                    >
-                                                        <PuzzleIcon className={'w-7 text-gray-300'} />
-                                                    </div>
-                                                )}
-                                                <div className={'min-w-0 flex-1'}>
-                                                    <div className={'flex items-center gap-2 min-w-0'}>
-                                                        <p className={'font-medium text-gray-100 truncate'}>
-                                                            {plugin.name}
-                                                        </p>
-                                                        <a
-                                                            href={plugin.url}
-                                                            target={'_blank'}
-                                                            rel={'noreferrer'}
-                                                            className={
-                                                                'text-gray-300 hover:text-gray-100 flex-shrink-0'
-                                                            }
-                                                        >
-                                                            <ExternalLinkIcon className={'w-4'} />
-                                                        </a>
-                                                    </div>
-                                                    <p className={'text-xs uppercase text-gray-400'}>
-                                                        {plugin.platform} {plugin.author && `by ${plugin.author}`}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                            <p className={'text-sm text-gray-300 line-clamp-3 min-h-[3.75rem]'}>
-                                                {plugin.description || 'No description provided.'}
-                                            </p>
-                                            <div className={'grid grid-cols-3 gap-2 text-xs text-gray-300'}>
-                                                <span>{formatDate(plugin.updatedAt)}</span>
-                                                <span>{formatNumber(plugin.downloads)} downloads</span>
-                                                <span className={'flex items-center justify-end'}>
-                                                    <StarIcon className={'w-4 mr-1'} />
-                                                    {plugin.stars}
-                                                </span>
-                                            </div>
-                                            {isInstalled ? (
-                                                <div
-                                                    className={
-                                                        'text-sm text-green-300 bg-green-900 bg-opacity-30 rounded-component px-3 py-2 text-center'
-                                                    }
-                                                >
-                                                    Plugin Installed
-                                                </div>
-                                            ) : (
-                                                <Button onClick={() => openVersions(plugin)}>
-                                                    <SwitchHorizontalIcon className={'w-5 mr-2'} />
-                                                    Select Version
-                                                </Button>
-                                            )}
-                                        </div>
-                                    );
-                                })
+                                plugins.map((plugin) => (
+                                    <MarketplacePluginCard
+                                        key={`${plugin.platform}:${plugin.id}`}
+                                        plugin={plugin}
+                                        installed={marketplaceInstalled(plugin) || plugin.installed}
+                                        installing={installing === plugin.id}
+                                        onInstallLatest={installLatest}
+                                        onSelectVersion={openVersions}
+                                    />
+                                ))
                             )}
                             {!searching && plugins.length === 0 && (
                                 <p className={'lg:col-span-2 text-center text-sm text-gray-300 py-12'}>
@@ -325,131 +307,69 @@ export default () => {
                             )}
                         </div>
 
-                        <div className={'flex justify-between'}>
-                            <Button.Text
-                                disabled={page <= 1 || searching}
-                                onClick={() => setPage((value) => Math.max(1, value - 1))}
-                            >
-                                Previous
-                            </Button.Text>
-                            <span className={'text-sm text-gray-300 py-2'}>Page {page}</span>
-                            <Button.Text
-                                disabled={searching || plugins.length < 12}
-                                onClick={() => setPage((value) => value + 1)}
-                            >
-                                Next
-                            </Button.Text>
-                        </div>
+                        <PaginationControls
+                            page={page}
+                            searching={searching}
+                            hasNext={plugins.length >= 12}
+                            onPrevious={() => setPage((value) => Math.max(1, value - 1))}
+                            onNext={() => setPage((value) => value + 1)}
+                        />
                     </div>
 
-                    <div className={'bg-gray-700 rounded-box backdrop p-5 xl:sticky xl:top-4 h-max'}>
-                        <p className={'font-medium text-gray-100 mb-4'}>Filters</p>
-                        <div className={'space-y-4'}>
-                            <div className={'grid grid-cols-2 gap-2'}>
-                                {(['modrinth', 'spiget'] as MarketplacePlatform[]).map((item) => (
-                                    <label
-                                        key={item}
-                                        className={
-                                            'flex items-center gap-2 text-sm text-gray-200 bg-gray-600 rounded-component px-3 py-2'
-                                        }
-                                    >
-                                        <Input
-                                            type={'radio'}
-                                            checked={platform === item}
-                                            onChange={() => {
-                                                setPlatform(item);
-                                                setPage(1);
-                                            }}
-                                        />
-                                        {item === 'spiget' ? 'Spigot' : 'Modrinth'}
-                                    </label>
-                                ))}
-                            </div>
-                            <div>
-                                <p className={'text-xs uppercase text-gray-400 mb-2'}>Minecraft Version</p>
-                                <Input
-                                    value={version}
-                                    placeholder={'1.21.4'}
-                                    onChange={(e) => setVersion(e.currentTarget.value)}
-                                />
-                            </div>
-                            <div>
-                                <p className={'text-xs uppercase text-gray-400 mb-2'}>Loader</p>
-                                <Select
-                                    value={loader}
-                                    disabled={platform !== 'modrinth'}
-                                    onChange={(e) => setLoader(e.currentTarget.value)}
-                                >
-                                    <option value={'paper'}>Paper</option>
-                                    <option value={'purpur'}>Purpur</option>
-                                    <option value={'spigot'}>Spigot</option>
-                                    <option value={'bukkit'}>Bukkit</option>
-                                </Select>
-                            </div>
-                            <Button.Text
-                                css={tw`w-full`}
-                                onClick={() => {
+                    {showMobileFilters && (
+                        <Modal visible appear onDismissed={() => setShowMobileFilters(false)} top>
+                            <MarketplaceFilters
+                                mode={'sheet'}
+                                platform={platform}
+                                version={version}
+                                loader={loader}
+                                onPlatformChange={(value) => {
+                                    setPlatform(value);
+                                    setPage(1);
+                                }}
+                                onVersionChange={setVersion}
+                                onLoaderChange={setLoader}
+                                onReset={() => {
                                     setVersion('');
                                     setLoader('paper');
                                     setPage(1);
                                 }}
-                            >
-                                Reset Filters
-                            </Button.Text>
-                        </div>
-                    </div>
+                            />
+                        </Modal>
+                    )}
+
+                    {showInstalledMenu && (
+                        <Modal visible appear onDismissed={() => setShowInstalledMenu(false)} top>
+                            <InstalledPluginsPanel
+                                plugins={installedPlugins}
+                                busy={fileAction}
+                                onDelete={requestDeleteInstalledPlugin}
+                                onRename={renameInstalledPlugin}
+                                onUpdate={updateInstalled}
+                            />
+                        </Modal>
+                    )}
+
+                    <Dialog.Confirm
+                        open={!!pendingDelete}
+                        onClose={() => setPendingDelete(null)}
+                        title={'Delete plugin'}
+                        confirm={'Delete'}
+                        onConfirmed={deleteInstalledPlugin}
+                    >
+                        {pendingDelete ? `Delete ${pendingDelete} from /plugins? This cannot be undone.` : ''}
+                    </Dialog.Confirm>
 
                     {selected && (
-                        <Modal visible appear onDismissed={() => setSelected(null)} showSpinnerOverlay={!!installing}>
-                            <div className={'space-y-4'}>
-                                <div>
-                                    <p className={'text-lg font-medium text-gray-100'}>{selected.name}</p>
-                                    <p className={'text-sm text-gray-300'}>
-                                        Select a compatible version to install into /plugins.
-                                    </p>
-                                </div>
-                                {versionsLoading ? (
-                                    <Spinner centered />
-                                ) : versions.length > 0 ? (
-                                    <div className={'grid gap-2 max-h-[28rem] overflow-y-auto'}>
-                                        {versions.map((item) => {
-                                            const exists = installedSet.has(installedKey(item.filename));
-                                            return (
-                                                <div
-                                                    key={item.id}
-                                                    className={
-                                                        'flex flex-col md:flex-row md:items-center justify-between gap-3 bg-gray-700 rounded-box p-3'
-                                                    }
-                                                >
-                                                    <div className={'min-w-0'}>
-                                                        <p className={'text-sm font-medium text-gray-100 truncate'}>
-                                                            {item.name || item.versionNumber}
-                                                        </p>
-                                                        <p className={'text-xs text-gray-400 truncate'}>
-                                                            {item.filename} · {formatDate(item.createdAt)}
-                                                        </p>
-                                                    </div>
-                                                    {exists ? (
-                                                        <span className={'text-sm text-green-300'}>
-                                                            Plugin Installed
-                                                        </span>
-                                                    ) : (
-                                                        <Button
-                                                            disabled={!!installing}
-                                                            onClick={() => installVersion(selected, item)}
-                                                        >
-                                                            {versions.length === 1 ? 'Install' : 'Install Version'}
-                                                        </Button>
-                                                    )}
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
-                                ) : (
-                                    <p className={'text-sm text-gray-300'}>No compatible versions found.</p>
-                                )}
-                            </div>
-                        </Modal>
+                        <MarketplaceVersionModal
+                            plugin={selected}
+                            versions={versions}
+                            installed={installedSet}
+                            loading={versionsLoading}
+                            installing={!!installing}
+                            onDismissed={() => setSelected(null)}
+                            onInstall={(version) => installVersion(selected, version)}
+                        />
                     )}
                 </div>
             )}

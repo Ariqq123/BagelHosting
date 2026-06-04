@@ -15,6 +15,7 @@ export interface MarketplacePlugin {
     updatedAt: string | null;
     url: string;
     installed: boolean;
+    external: boolean;
 }
 
 export interface MarketplaceVersion {
@@ -62,7 +63,7 @@ export const installMarketplacePlugin = async (
     uuid: string,
     platform: MarketplacePlatform,
     project: string,
-    versionId: string,
+    versionId: string | null,
     version?: string,
     loader?: string
 ): Promise<{ filename: string }> => {
