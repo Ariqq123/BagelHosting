@@ -28,8 +28,8 @@ class LocaleController extends Controller
         $response = [];
         foreach ($locales as $locale) {
             if (!in_array($locale, [
-                'en', 'cs', 'da', 'fr', 'de', 'hi', 'id', 'it', 'ko', 'pt', 'pt-BR',
-                'pa', 'ro', 'ru', 'es', 'sv', 'tr', 'uk'
+                'en', 'cs', 'da', 'de', 'es', 'fr', 'hi', 'hi-EN', 'id', 'it', 'ja',
+                'ko', 'lt', 'nl', 'pa', 'pt', 'pt-BR', 'ro', 'ru', 'sv', 'tr', 'uk', 'ur'
             ])) {
                 continue;
             }
