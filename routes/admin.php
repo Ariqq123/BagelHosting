@@ -122,6 +122,8 @@ Route::group(['prefix' => 'settings'], function () {
     Route::get('/', [Admin\Settings\IndexController::class, 'index'])->name('admin.settings');
     Route::get('/mail', [Admin\Settings\MailController::class, 'index'])->name('admin.settings.mail');
     Route::get('/advanced', [Admin\Settings\AdvancedController::class, 'index'])->name('admin.settings.advanced');
+    Route::get('/mc-versions', [Admin\Settings\McVersionsController::class, 'index'])->name('admin.settings.mc-versions');
+    Route::post('/mc-versions/sync', [Admin\Settings\McVersionsController::class, 'sync'])->name('admin.settings.mc-versions.sync');
 
     Route::post('/mail/test', [Admin\Settings\MailController::class, 'test'])->name('admin.settings.mail.test');
 
