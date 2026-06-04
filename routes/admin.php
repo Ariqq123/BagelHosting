@@ -99,6 +99,15 @@ Route::group(['prefix' => 'databases'], function () {
     Route::delete('/view/{host:id}', [Admin\DatabaseController::class, 'delete']);
 });
 
+Route::group(['prefix' => 'subdomains'], function () {
+    Route::get('/', [Admin\SubdomainDomainController::class, 'index'])->name('admin.subdomains');
+    Route::get('/new', [Admin\SubdomainDomainController::class, 'create'])->name('admin.subdomains.create');
+    Route::post('/', [Admin\SubdomainDomainController::class, 'store'])->name('admin.subdomains.store');
+    Route::get('/view/{domain:id}', [Admin\SubdomainDomainController::class, 'edit'])->name('admin.subdomains.edit');
+    Route::patch('/view/{domain:id}', [Admin\SubdomainDomainController::class, 'update'])->name('admin.subdomains.update');
+    Route::delete('/view/{domain:id}', [Admin\SubdomainDomainController::class, 'delete'])->name('admin.subdomains.delete');
+});
+
 /*
 |--------------------------------------------------------------------------
 | Settings Controller Routes

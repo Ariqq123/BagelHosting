@@ -96,6 +96,11 @@
                                 <i data-lucide="database"></i> <span>Databases</span>
                             </a>
                         </li>
+                        <li class="{{ ! starts_with(Route::currentRouteName(), 'admin.subdomains') ?: 'active' }}">
+                            <a href="{{ route('admin.subdomains') }}">
+                                <i data-lucide="globe"></i> <span>Subdomains</span>
+                            </a>
+                        </li>
                         <li class="{{ ! starts_with(Route::currentRouteName(), 'admin.locations') ?: 'active' }}">
                             <a href="{{ route('admin.locations') }}">
                                 <i data-lucide="globe-2"></i> <span>Locations</span>
