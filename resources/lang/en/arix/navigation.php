@@ -20,6 +20,7 @@ return [
     'databases' => 'Databases',
     'backups' => 'Backups',
     'network' => 'Network',
+    'subdomains' => 'Subdomains',
     'plugins' => 'Plugins',
     'schedules' => 'Schedules',
     'users' => 'Users',

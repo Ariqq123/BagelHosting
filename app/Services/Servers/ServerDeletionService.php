@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Database\ConnectionInterface;
 use Pterodactyl\Repositories\Wings\DaemonServerRepository;
 use Pterodactyl\Services\Databases\DatabaseManagementService;
+use Pterodactyl\Services\Subdomains\SubdomainManagementService;
 use Pterodactyl\Exceptions\Http\Connection\DaemonConnectionException;
 
 class ServerDeletionService
@@ -21,6 +22,7 @@ class ServerDeletionService
         private ConnectionInterface $connection,
         private DaemonServerRepository $daemonServerRepository,
         private DatabaseManagementService $databaseManagementService,
+        private SubdomainManagementService $subdomainManagementService,
     ) {
     }
 
@@ -57,6 +59,10 @@ class ServerDeletionService
         }
 
         $this->connection->transaction(function () use ($server) {
+            foreach ($server->subdomains as $subdomain) {
+                $this->subdomainManagementService->delete($subdomain);
+            }
+
             foreach ($server->databases as $database) {
                 try {
                     $this->databaseManagementService->delete($database);
