@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import TitledGreyBox from '@/components/elements/TitledGreyBox';
 import Switch from '@/components/elements/Switch';
 import Select from '@/components/elements/Select';
+import { languages } from '@/components/dashboard/forms/languages';
 
 const AppearanceWrapper = () => {
     const { i18n, t } = useTranslation('arix/account');
@@ -22,10 +23,6 @@ const AppearanceWrapper = () => {
     const langSwitch = String(useStoreState((state: ApplicationStore) => state.settings.data!.arix.langSwitch));
     const defaultMode = useStoreState((state: ApplicationStore) => state.settings.data!.arix.defaultMode);
 
-    const languages = [
-        { key: 'en', value: 'English' },
-    ];
-
     const handleLanguageChange = (event: ChangeEvent<HTMLSelectElement>) => {
         const newLanguage = event.target.value;
         i18n.changeLanguage(newLanguage);
@@ -35,7 +32,6 @@ const AppearanceWrapper = () => {
     useEffect(() => {
         setSelectedLanguage(i18n.language || 'en');
     }, [i18n.language]);
-    
 
     useEffect(() => {
         localStorage.setItem('darkMode', String(isDarkMode));
@@ -49,33 +45,39 @@ const AppearanceWrapper = () => {
     useEffect(() => {
         localStorage.setItem('panelSounds', String(panelSounds));
     }, [panelSounds]);
-    
+
     const toggleSounds = () => {
         isPanelSounds((prevMode) => !prevMode);
     };
 
     return (
         <TitledGreyBox title={t('appearance.title')}>
-            {modeToggler == 'true' &&
-            <div className={'flex justify-between items-center mb-4'}>
-                <p>{t('appearance.lightDarkMode')}</p>
-                <div className={'flex gap-x-2 items-center'}>
-                    <span className={'text-sm text-gray-300'}>{defaultMode == 'lightmode' ? t('appearance.light') : t('appearance.dark')}</span>
-                    <Switch name={'mode'} onChange={toggleDarkMode} defaultChecked={isDarkMode} />
-                    <span className={'text-sm text-gray-300'}>{defaultMode !== 'lightmode' ? t('appearance.light') : t('appearance.dark')}</span>
+            {modeToggler === 'true' && (
+                <div className={'flex justify-between items-center mb-4'}>
+                    <p>{t('appearance.lightDarkMode')}</p>
+                    <div className={'flex gap-x-2 items-center'}>
+                        <span className={'text-sm text-gray-300'}>
+                            {defaultMode === 'lightmode' ? t('appearance.light') : t('appearance.dark')}
+                        </span>
+                        <Switch name={'mode'} onChange={toggleDarkMode} defaultChecked={isDarkMode} />
+                        <span className={'text-sm text-gray-300'}>
+                            {defaultMode !== 'lightmode' ? t('appearance.light') : t('appearance.dark')}
+                        </span>
+                    </div>
                 </div>
-            </div>}
-            {langSwitch == 'true' &&
-            <div className={'flex justify-between items-center mb-4'}>
-                <p className={'flex-1'}>{t('appearance.language')}</p>
-                <Select value={selectedLanguage} className={'!w-auto !pr-10'} onChange={handleLanguageChange}>
-                    {languages.map(({ key, value }) => (
-                        <option key={key} value={key}>
-                            {value}
-                        </option>
-                    ))}
-                </Select>
-            </div>}
+            )}
+            {langSwitch === 'true' && (
+                <div className={'flex justify-between items-center mb-4'}>
+                    <p className={'flex-1'}>{t('appearance.language')}</p>
+                    <Select value={selectedLanguage} className={'!w-auto !pr-10'} onChange={handleLanguageChange}>
+                        {languages.map(({ key, value }) => (
+                            <option key={key} value={key}>
+                                {value}
+                            </option>
+                        ))}
+                    </Select>
+                </div>
+            )}
             <div className={'flex justify-between items-center'}>
                 <p>{t('appearance.panel-sounds')}</p>
                 <div className={'flex gap-x-2 items-center'}>
