@@ -100,10 +100,15 @@ Route::group([
     Route::group(['prefix' => '/plugins'], function () {
         Route::get('/', [Client\Servers\PluginController::class, 'index']);
         Route::get('/marketplace/search', [Client\Servers\PluginController::class, 'searchMarketplace']);
+        Route::get('/marketplace/installed', [Client\Servers\PluginController::class, 'installedMarketplace']);
+        Route::middleware([ResourceLimit::PluginInstall->middleware()])
+            ->post('/marketplace/installed/update', [Client\Servers\PluginController::class, 'updateInstalledMarketplace']);
+        Route::post('/marketplace/installed/rename', [Client\Servers\PluginController::class, 'renameInstalledMarketplace']);
+        Route::post('/marketplace/installed/delete', [Client\Servers\PluginController::class, 'deleteInstalledMarketplace']);
         Route::get('/marketplace/{platform}/{project}/versions', [Client\Servers\PluginController::class, 'marketplaceVersions']);
-        Route::middleware([ResourceLimit::FilePull->middleware()])
+        Route::middleware([ResourceLimit::PluginInstall->middleware()])
             ->post('/marketplace/{platform}/{project}/install', [Client\Servers\PluginController::class, 'installMarketplace']);
-        Route::middleware([ResourceLimit::FilePull->middleware()])
+        Route::middleware([ResourceLimit::PluginInstall->middleware()])
             ->post('/{plugin:id}/download', [Client\Servers\PluginController::class, 'download']);
     });
 

@@ -4,6 +4,7 @@ namespace Pterodactyl\Services\Plugins;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\TransferException;
+use GuzzleHttp\TransferStats;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
@@ -33,7 +34,7 @@ class PluginMarketplaceService
         $page = max(1, min($page, 25));
 
         return Cache::remember(
-            sprintf('plugin-marketplace:search:%s:%s:%s:%s:%d', $platform, md5($query), $version, $loader, $page),
+            sprintf('plugin-marketplace:search:v5:%s:%s:%s:%s:%d', $platform, md5($query), $version, $loader, $page),
             300,
             fn () => $platform === 'modrinth' ? $this->searchModrinth($query, $page, $version, $loader) : $this->searchSpiget($query, $page)
         );
@@ -44,7 +45,7 @@ class PluginMarketplaceService
         $platform = $this->normalizePlatform($platform);
 
         return Cache::remember(
-            sprintf('plugin-marketplace:versions:%s:%s:%s:%s', $platform, md5($project), $gameVersion, $loader),
+            sprintf('plugin-marketplace:versions:v5:%s:%s:%s:%s', $platform, md5($project), $gameVersion, $loader),
             300,
             fn () => $platform === 'modrinth' ? $this->modrinthVersions($project, $gameVersion, $loader) : $this->spigetVersions($project)
         );
@@ -77,12 +78,17 @@ class PluginMarketplaceService
         if ($version !== '') $facets[] = ["versions:{$version}"];
         if ($loader !== '') $facets[] = ["categories:{$loader}"];
 
-        $json = $this->getJson('https://api.modrinth.com/v2/search', [
-            'query' => $query,
+        $params = [
             'limit' => 12,
             'offset' => ($page - 1) * 12,
             'facets' => json_encode($facets),
-        ]);
+            'index' => 'downloads',
+        ];
+        if ($query !== '') {
+            $params['query'] = $query;
+        }
+
+        $json = $this->getJson('https://api.modrinth.com/v2/search', $params);
 
         return [
             'data' => collect(Arr::get($json, 'hits', []))->map(fn (array $project) => [
@@ -98,6 +104,7 @@ class PluginMarketplaceService
                 'updatedAt' => Arr::get($project, 'date_modified'),
                 'url' => 'https://modrinth.com/plugin/' . Arr::get($project, 'slug'),
                 'installed' => false,
+                'external' => false,
             ])->values()->all(),
             'meta' => ['page' => $page, 'perPage' => 12, 'total' => (int) Arr::get($json, 'total_hits', 0)],
         ];
@@ -105,27 +112,35 @@ class PluginMarketplaceService
 
     private function searchSpiget(string $query, int $page): array
     {
-        try {
-            $json = $this->getJson('https://api.spiget.org/v2/search/resources/free/' . rawurlencode($query), [
-                'page' => $page,
-                'size' => 12,
-                'sort' => '-downloads',
-            ]);
-        } catch (BadRequestHttpException) {
-            $json = $this->getJson('https://api.spiget.org/v2/search/resources/' . rawurlencode($query), [
+        if ($query === '') {
+            $json = $this->getJson('https://api.spiget.org/v2/resources', [
                 'page' => $page,
                 'size' => 24,
                 'sort' => '-downloads',
             ]);
+        } else {
+            try {
+                $json = $this->getJson('https://api.spiget.org/v2/search/resources/free/' . rawurlencode($query), [
+                    'page' => $page,
+                    'size' => 12,
+                    'sort' => '-downloads',
+                ]);
+            } catch (BadRequestHttpException) {
+                $json = $this->getJson('https://api.spiget.org/v2/search/resources/' . rawurlencode($query), [
+                    'page' => $page,
+                    'size' => 24,
+                    'sort' => '-downloads',
+                ]);
+            }
         }
 
         return [
-            'data' => collect($json)->filter(fn (array $project) => !(bool) Arr::get($project, 'premium', false) && !(bool) Arr::get($project, 'external', false))->take(12)->map(fn (array $project) => [
+            'data' => collect($json)->filter(fn (array $project) => !(bool) Arr::get($project, 'premium', false))->take(12)->map(fn (array $project) => [
                 'platform' => 'spiget',
                 'id' => (string) Arr::get($project, 'id'),
                 'slug' => (string) Arr::get($project, 'id'),
                 'name' => (string) Arr::get($project, 'name'),
-                'author' => (string) Arr::get($project, 'author.name', Arr::get($project, 'author.id', '')),
+                'author' => $this->spigetAuthorName((int) Arr::get($project, 'id'), Arr::get($project, 'author')),
                 'description' => (string) Arr::get($project, 'tag', ''),
                 'iconUrl' => Arr::get($project, 'icon.url') ? 'https://www.spigotmc.org/' . ltrim(Arr::get($project, 'icon.url'), '/') : null,
                 'downloads' => (int) Arr::get($project, 'downloads', 0),
@@ -133,9 +148,36 @@ class PluginMarketplaceService
                 'updatedAt' => Arr::get($project, 'updateDate') ? date(DATE_ATOM, (int) Arr::get($project, 'updateDate')) : null,
                 'url' => 'https://www.spigotmc.org/resources/' . Arr::get($project, 'id'),
                 'installed' => false,
+                'external' => (bool) Arr::get($project, 'external', false),
             ])->values()->all(),
             'meta' => ['page' => $page, 'perPage' => 12, 'total' => null],
         ];
+    }
+
+    private function spigetAuthorName(int $resource, mixed $author): string
+    {
+        if ($resource > 0) {
+            return Cache::remember("plugin-marketplace:spiget-resource-author:{$resource}", 86400, function () use ($resource, $author) {
+                try {
+                    $json = $this->getJson("https://api.spiget.org/v2/resources/{$resource}/author");
+                } catch (BadRequestHttpException) {
+                    return $this->spigetFallbackAuthor($author);
+                }
+
+                return (string) Arr::get($json, 'name', $this->spigetFallbackAuthor($author));
+            });
+        }
+
+        return $this->spigetFallbackAuthor($author);
+    }
+
+    private function spigetFallbackAuthor(mixed $author): string
+    {
+        if (is_array($author) && Arr::get($author, 'name')) {
+            return (string) Arr::get($author, 'name');
+        }
+
+        return (string) (is_array($author) ? Arr::get($author, 'id', '') : $author);
     }
 
     private function modrinthVersions(string $project, string $gameVersion, string $loader): array
@@ -166,12 +208,43 @@ class PluginMarketplaceService
     private function spigetVersions(string $project): array
     {
         $resource = $this->getJson("https://api.spiget.org/v2/resources/{$project}");
+        $fallback = $this->sanitizeBase((string) Arr::get($resource, 'name', $project)) . '.jar';
+
         if ((bool) Arr::get($resource, 'external')) {
-            return [];
+            $externalUrl = (string) Arr::get($resource, 'file.externalUrl', '');
+            if (!filter_var($externalUrl, FILTER_VALIDATE_URL)) {
+                throw new BadRequestHttpException('External SpiGet download URL is invalid.');
+            }
+
+            $versions = $this->getJson("https://api.spiget.org/v2/resources/{$project}/versions", ['size' => 20, 'sort' => '-releaseDate']);
+            $currentVersion = (string) Arr::get($resource, 'version.name', Arr::get($versions, '0.name', ''));
+            $versions = $versions ?: [[
+                'id' => Arr::get($resource, 'version.id', 'external'),
+                'name' => $currentVersion ?: 'External Download',
+                'releaseDate' => Arr::get($resource, 'updateDate'),
+            ]];
+
+            return collect($versions)->map(function (array $version) use ($externalUrl, $currentVersion, $fallback) {
+                $versionName = (string) Arr::get($version, 'name', 'External Download');
+                $candidate = $currentVersion !== '' ? str_replace($currentVersion, $versionName, $externalUrl) : $externalUrl;
+                $downloadUrl = $this->resolveDownloadUrl($candidate);
+
+                if (!$downloadUrl) {
+                    return null;
+                }
+
+                return [
+                    'id' => (string) Arr::get($version, 'id', $versionName),
+                    'name' => $versionName,
+                    'versionNumber' => $versionName,
+                    'createdAt' => Arr::get($version, 'releaseDate') ? date(DATE_ATOM, (int) Arr::get($version, 'releaseDate')) : null,
+                    'filename' => $this->externalFilename($candidate, $fallback),
+                    'downloadUrl' => $downloadUrl,
+                ];
+            })->filter()->values()->all();
         }
 
         $versions = $this->getJson("https://api.spiget.org/v2/resources/{$project}/versions", ['size' => 20, 'sort' => '-releaseDate']);
-        $fallback = $this->sanitizeBase((string) Arr::get($resource, 'name', $project)) . '.jar';
 
         return collect($versions ?: [['id' => 'latest', 'name' => Arr::get($resource, 'version.name', 'latest')]])->map(fn (array $version) => [
             'id' => (string) Arr::get($version, 'id', 'latest'),
@@ -181,6 +254,24 @@ class PluginMarketplaceService
             'filename' => $fallback,
             'downloadUrl' => "https://api.spiget.org/v2/resources/{$project}/download",
         ])->values()->all();
+    }
+
+    private function resolveDownloadUrl(string $url): ?string
+    {
+        $effectiveUrl = $url;
+
+        try {
+            $response = $this->http->head($url, [
+                'allow_redirects' => ['max' => 5, 'track_redirects' => true],
+                'on_stats' => function (TransferStats $stats) use (&$effectiveUrl) {
+                    $effectiveUrl = (string) $stats->getEffectiveUri();
+                },
+            ]);
+        } catch (TransferException) {
+            return null;
+        }
+
+        return $response->getStatusCode() < 400 && filter_var($effectiveUrl, FILTER_VALIDATE_URL) ? $effectiveUrl : null;
     }
 
     private function getJson(string $url, array $query = []): array
@@ -206,6 +297,14 @@ class PluginMarketplaceService
         }
 
         return $platform;
+    }
+
+    private function externalFilename(string $url, string $fallback): string
+    {
+        $path = parse_url($url, PHP_URL_PATH) ?: '';
+        $name = basename($path);
+
+        return str_ends_with(strtolower($name), '.jar') ? $this->sanitizeFilename($name) : $fallback;
     }
 
     private function sanitizeBase(string $value): string
