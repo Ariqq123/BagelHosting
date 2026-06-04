@@ -8,13 +8,24 @@ import useFlash from '@/plugins/useFlash';
 import tw from 'twin.macro';
 import TableList from '@/components/elements/TableList';
 import ServerContentBlock from '@/components/elements/ServerContentBlock';
-import { GlobeIcon } from '@heroicons/react/outline';
 import getServerSubdomains, {
     ServerSubdomain,
     SubdomainDomainOption,
 } from '@/api/server/subdomains/getServerSubdomains';
 import CreateSubdomainButton from '@/components/server/subdomains/CreateSubdomainButton';
 import SubdomainRow from '@/components/server/subdomains/SubdomainRow';
+
+const SubdomainsIcon = (props: React.SVGProps<SVGSVGElement>) => (
+    <svg fill={'none'} viewBox={'0 0 24 24'} stroke={'currentColor'} {...props}>
+        <path
+            strokeLinecap={'round'}
+            strokeLinejoin={'round'}
+            d={
+                'M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9'
+            }
+        />
+    </svg>
+);
 
 export default () => {
     const uuid = ServerContext.useStoreState((state) => state.server.data!.uuid);
@@ -41,7 +52,7 @@ export default () => {
     const removeSubdomain = (id: number) => setSubdomains((items) => items.filter((item) => item.id !== id));
 
     return (
-        <ServerContentBlock title={'Subdomains'} icon={GlobeIcon}>
+        <ServerContentBlock title={'Subdomains'} icon={SubdomainsIcon}>
             <FlashMessageRender byKey={'subdomains'} css={tw`mb-4`} />
 
             {loading ? (
