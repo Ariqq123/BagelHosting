@@ -52,6 +52,7 @@ class BuildModificationService
                 'database_limit' => Arr::get($data, 'database_limit', 0) ?? null,
                 'allocation_limit' => Arr::get($data, 'allocation_limit', 0) ?? null,
                 'backup_limit' => Arr::get($data, 'backup_limit', 0) ?? 0,
+                'subdomain_limit' => Arr::get($data, 'subdomain_limit', 0) ?? 0,
             ]))->saveOrFail();
 
             return $server->refresh();
