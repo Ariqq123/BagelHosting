@@ -90,7 +90,7 @@ class SubdomainManagementService
     private function getRecordContent(Server $server, SubdomainDomain $domain, string $type): string
     {
         if ($type === 'A') {
-            return $server->allocation->ip;
+            return $this->getARecordContent($server);
         }
 
         if ($type === 'CNAME' && !empty($domain->cname_target)) {
@@ -98,5 +98,29 @@ class SubdomainManagementService
         }
 
         throw new DisplayException('The selected domain is missing a CNAME target.');
+    }
+
+    /**
+     * @throws DisplayException
+     */
+    private function getARecordContent(Server $server): string
+    {
+        $allocation = $server->allocation;
+        if (!$allocation) {
+            throw new DisplayException('This server does not have a primary allocation.');
+        }
+
+        if ($allocation->ip !== '0.0.0.0') {
+            return $allocation->ip;
+        }
+
+        foreach (array_filter([$allocation->ip_alias, $server->node?->fqdn]) as $hostname) {
+            $records = gethostbynamel($hostname);
+            if (!empty($records)) {
+                return $records[0];
+            }
+        }
+
+        throw new DisplayException('Could not resolve this server allocation alias or node FQDN to an IP address.');
     }
 }

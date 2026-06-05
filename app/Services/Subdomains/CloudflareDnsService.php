@@ -80,6 +80,28 @@ class CloudflareDnsService
     /**
      * @throws DisplayException
      */
+    public function updateRecord(SubdomainDomain $domain, string $recordId, string $type, string $fqdn, string $content, bool $proxied): void
+    {
+        $response = Http::withToken($domain->cloudflare_token)
+            ->acceptJson()
+            ->asJson()
+            ->put(sprintf('%s/zones/%s/dns_records/%s', self::BASE_URL, $domain->cloudflare_zone_id, $recordId), [
+                'type' => $type,
+                'name' => $fqdn,
+                'content' => $content,
+                'proxied' => $proxied,
+                'ttl' => 1,
+            ]);
+
+        $payload = $response->json() ?? [];
+        if (!$response->successful() || !Arr::get($payload, 'success')) {
+            throw new DisplayException($this->getErrorMessage($payload, 'Cloudflare failed to update the DNS record.'));
+        }
+    }
+
+    /**
+     * @throws DisplayException
+     */
     public function deleteRecord(SubdomainDomain $domain, string $recordId): void
     {
         $response = Http::withToken($domain->cloudflare_token)
