@@ -3,7 +3,10 @@ import http from '@/api/http';
 export interface ServerVersionSoftware {
     id: number;
     name: string;
+    type: string;
     description: string;
+    icon: string | null;
+    color: string | null;
 }
 
 export interface ServerVersionsResponse {

@@ -40,6 +40,18 @@ const iconForSoftware = (software?: ServerVersionSoftware) => {
 const SoftwareIcon = ({ software }: { software?: ServerVersionSoftware }) => {
     const icon = iconForSoftware(software);
 
+    if (software?.icon) {
+        return (
+            <span
+                title={software.name}
+                css={tw`inline-flex h-6 w-6 flex-shrink-0 items-center justify-center overflow-hidden rounded`}
+                style={{ backgroundColor: software.color ?? undefined }}
+            >
+                <img src={software.icon} alt={software.name} css={tw`h-5 w-5 object-contain`} />
+            </span>
+        );
+    }
+
     return (
         <span
             title={icon.name}
@@ -153,7 +165,7 @@ const VersionsContainer = () => {
                                 >
                                     {data?.software.map((software) => (
                                         <option key={software.id} value={software.id}>
-                                            {iconForSoftware(software).label} - {software.name}
+                                            {software.type || iconForSoftware(software).label} - {software.name}
                                         </option>
                                     ))}
                                 </Select>

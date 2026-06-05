@@ -4,6 +4,8 @@ namespace Pterodactyl\Http\Controllers\Api\Client\Servers;
 
 use Illuminate\Http\JsonResponse;
 use Illuminate\Database\ConnectionInterface;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Http;
 use Pterodactyl\Exceptions\DisplayException;
 use Pterodactyl\Facades\Activity;
 use Pterodactyl\Http\Controllers\Api\Client\ClientApiController;
@@ -28,17 +30,26 @@ class VersionsController extends ClientApiController
     public function index(Server $server, ViewVersionsRequest $request): JsonResponse
     {
         $eggs = $this->managedEggs()->get(['id', 'name', 'description']);
+        $mcJarsTypes = $this->mcJarsTypes();
         $currentEgg = $server->egg;
         $versionVariable = $server->variables()
             ->where('env_variable', 'MINECRAFT_VERSION')
             ->first();
 
         return new JsonResponse([
-            'software' => $eggs->map(fn (Egg $egg) => [
-                'id' => $egg->id,
-                'name' => $egg->name,
-                'description' => trim(str_replace(McVersionsCatalogService::MARKER, '', $egg->description ?? '')),
-            ])->values(),
+            'software' => $eggs->map(function (Egg $egg) use ($mcJarsTypes) {
+                $type = $this->mcJarsTypeForEgg($egg);
+                $metadata = $mcJarsTypes[$type] ?? [];
+
+                return [
+                    'id' => $egg->id,
+                    'name' => $egg->name,
+                    'type' => $type,
+                    'description' => trim(str_replace(McVersionsCatalogService::MARKER, '', $egg->description ?? '')),
+                    'icon' => $metadata['icon'] ?? null,
+                    'color' => $metadata['color'] ?? null,
+                ];
+            })->values(),
             'current' => [
                 'egg_id' => $currentEgg?->id,
                 'name' => $currentEgg?->name,
@@ -105,5 +116,35 @@ class VersionsController extends ClientApiController
         $images = $egg->docker_images ?? [];
 
         return (string) (reset($images) ?: $egg->docker_image);
+    }
+
+    private function mcJarsTypes(): array
+    {
+        return Cache::remember('mc_versions.mcjars_types', now()->addDay(), function () {
+            try {
+                $response = Http::timeout(5)->get('https://mcjars.app/api/v1/types');
+
+                if (!$response->successful()) {
+                    return [];
+                }
+
+                return $response->json('types') ?? [];
+            } catch (\Throwable) {
+                return [];
+            }
+        });
+    }
+
+    private function mcJarsTypeForEgg(Egg $egg): string
+    {
+        return match (strtolower($egg->name)) {
+            'paper' => 'PAPER',
+            'purpur' => 'PURPUR',
+            'vanilla' => 'VANILLA',
+            'fabric' => 'FABRIC',
+            'forge' => 'FORGE',
+            'velocity' => 'VELOCITY',
+            default => strtoupper($egg->name),
+        };
     }
 }
