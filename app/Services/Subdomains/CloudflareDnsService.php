@@ -67,10 +67,17 @@ class CloudflareDnsService
      */
     public function createMinecraftSrvRecord(SubdomainDomain $domain, string $fqdn, int $port): string
     {
+        $relativeName = str_ends_with($fqdn, '.' . $domain->name)
+            ? substr($fqdn, 0, -1 * (strlen($domain->name) + 1))
+            : $fqdn;
+
         return $this->createDnsRecord($domain, [
             'type' => 'SRV',
             'name' => sprintf('_minecraft._tcp.%s', $fqdn),
             'data' => [
+                'service' => '_minecraft',
+                'proto' => '_tcp',
+                'name' => $relativeName,
                 'priority' => 0,
                 'weight' => 0,
                 'port' => $port,
