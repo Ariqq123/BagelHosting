@@ -24,22 +24,9 @@ import {
 
 const FLASH_KEY = 'server:versions';
 
-const iconForSoftware = (software?: ServerVersionSoftware) => {
-    const key = software?.name.toLowerCase() ?? '';
-
-    if (key.includes('paper')) return { label: 'P', name: 'Paper', css: tw`bg-green-500 text-green-900` };
-    if (key.includes('purpur')) return { label: 'P', name: 'Purpur', css: tw`bg-purple-500 text-purple-900` };
-    if (key.includes('vanilla')) return { label: 'V', name: 'Vanilla', css: tw`bg-yellow-400 text-yellow-900` };
-    if (key.includes('fabric')) return { label: 'F', name: 'Fabric', css: tw`bg-yellow-500 text-yellow-900` };
-    if (key.includes('forge')) return { label: 'F', name: 'Forge', css: tw`bg-red-400 text-red-900` };
-    if (key.includes('velocity')) return { label: 'V', name: 'Velocity', css: tw`bg-cyan-400 text-cyan-900` };
-
-    return { label: 'J', name: 'Server jar', css: tw`bg-neutral-300 text-neutral-900` };
-};
+const fallbackLabel = (software?: ServerVersionSoftware) => (software?.type || software?.name || 'J').charAt(0);
 
 const SoftwareIcon = ({ software }: { software?: ServerVersionSoftware }) => {
-    const icon = iconForSoftware(software);
-
     if (software?.icon) {
         return (
             <span
@@ -54,10 +41,11 @@ const SoftwareIcon = ({ software }: { software?: ServerVersionSoftware }) => {
 
     return (
         <span
-            title={icon.name}
-            css={[tw`inline-flex h-6 w-6 flex-shrink-0 items-center justify-center rounded text-xs font-bold`, icon.css]}
+            title={software?.name ?? 'Server jar'}
+            css={tw`inline-flex h-6 w-6 flex-shrink-0 items-center justify-center rounded bg-neutral-300 text-xs font-bold text-neutral-900`}
+            style={{ backgroundColor: software?.color ?? undefined }}
         >
-            {icon.label}
+            {fallbackLabel(software)}
         </span>
     );
 };
@@ -165,7 +153,7 @@ const VersionsContainer = () => {
                                 >
                                     {data?.software.map((software) => (
                                         <option key={software.id} value={software.id}>
-                                            {software.type || iconForSoftware(software).label} - {software.name}
+                                            {software.type} - {software.name}
                                         </option>
                                     ))}
                                 </Select>
