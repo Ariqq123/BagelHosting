@@ -16,6 +16,11 @@ interface Props {
     onDeleted: (id: number) => void;
 }
 
+const badgeStyles = tw`inline-flex items-center rounded px-2 py-1 text-xs font-semibold uppercase tracking-wide`;
+const cellStyles = tw`align-middle text-sm text-neutral-200`;
+const monoTextStyles = tw`font-mono text-sm font-semibold text-neutral-50 leading-5`;
+const mutedTextStyles = tw`text-xs text-neutral-300 leading-5`;
+
 export default ({ subdomain, onDeleted }: Props) => {
     const uuid = ServerContext.useStoreState((state) => state.server.data!.uuid);
     const { addError, clearFlashes } = useFlash();
@@ -62,32 +67,65 @@ export default ({ subdomain, onDeleted }: Props) => {
                     </Button.Danger>
                 </div>
             </Modal>
-            <tr>
-                <td>
+            <tr css={tw`hover:bg-neutral-700 hover:bg-opacity-40 transition-colors`}>
+                <td css={cellStyles}>
                     <CopyOnClick text={subdomain.fqdn}>
-                        <p>{subdomain.fqdn}</p>
+                        <p css={monoTextStyles}>{subdomain.fqdn}</p>
                     </CopyOnClick>
-                    {subdomain.errorMessage && <p css={tw`text-xs text-red-300 mt-1`}>{subdomain.errorMessage}</p>}
+                    {subdomain.errorMessage && (
+                        <p css={tw`text-xs font-medium text-red-300 mt-1`}>{subdomain.errorMessage}</p>
+                    )}
                 </td>
-                <td>{subdomain.type}</td>
-                <td>
+                <td css={cellStyles}>
+                    <span
+                        css={[
+                            badgeStyles,
+                            tw`bg-primary-500 bg-opacity-20 text-primary-100 border border-primary-400 border-opacity-40`,
+                        ]}
+                    >
+                        {subdomain.type}
+                    </span>
+                </td>
+                <td css={cellStyles}>
                     <CopyOnClick text={subdomain.content}>
-                        <p>{subdomain.content}</p>
+                        <p css={monoTextStyles}>{subdomain.content}</p>
                     </CopyOnClick>
                 </td>
-                <td>
+                <td css={cellStyles}>
                     {subdomain.minecraftAddress ? (
                         <CopyOnClick text={subdomain.minecraftAddress}>
-                            <p>{subdomain.minecraftAddress}</p>
+                            <p css={monoTextStyles}>{subdomain.minecraftAddress}</p>
                         </CopyOnClick>
                     ) : (
-                        <span css={tw`text-neutral-400`}>None</span>
+                        <span css={tw`text-sm font-medium text-neutral-400`}>None</span>
                     )}
-                    {subdomain.srvPort && <p css={tw`text-xs text-neutral-300 mt-1`}>SRV port {subdomain.srvPort}</p>}
+                    {subdomain.srvPort && <p css={mutedTextStyles}>SRV port {subdomain.srvPort}</p>}
                 </td>
-                <td>{subdomain.proxied ? 'Proxied' : 'DNS only'}</td>
-                <td>{subdomain.status}</td>
-                <td className={'w-1'}>
+                <td css={cellStyles}>
+                    <span
+                        css={[
+                            badgeStyles,
+                            subdomain.proxied
+                                ? tw`bg-yellow-500 bg-opacity-20 text-yellow-100 border border-yellow-400 border-opacity-40`
+                                : tw`bg-neutral-600 text-neutral-100 border border-neutral-500`,
+                        ]}
+                    >
+                        {subdomain.proxied ? 'Proxied' : 'DNS only'}
+                    </span>
+                </td>
+                <td css={cellStyles}>
+                    <span
+                        css={[
+                            badgeStyles,
+                            subdomain.status === 'active'
+                                ? tw`bg-green-500 bg-opacity-20 text-green-100 border border-green-400 border-opacity-40`
+                                : tw`bg-red-500 bg-opacity-20 text-red-100 border border-red-400 border-opacity-40`,
+                        ]}
+                    >
+                        {subdomain.status}
+                    </span>
+                </td>
+                <td className={'w-1 align-middle'}>
                     <div className={'flex justify-end'}>
                         <Can action={'subdomain.delete'}>
                             <Button.Danger onClick={() => setVisible(true)}>

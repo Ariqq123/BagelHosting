@@ -59,13 +59,16 @@ export default () => {
                 <Spinner size={'large'} centered />
             ) : (
                 <div className={'bg-gray-700 rounded-box backdrop'}>
-                    <div className={'flex lg:flex-row flex-col gap-2 items-start justify-between px-6 pt-5 pb-1'}>
+                    <div className={'flex lg:flex-row flex-col gap-4 items-start justify-between px-6 pt-5 pb-4'}>
                         <div>
-                            <p className={'text-medium text-gray-300'}>
+                            <p css={tw`text-lg font-semibold text-neutral-50 leading-tight`}>Subdomains</p>
+                            <p className={'text-sm text-gray-300 mt-1'}>
                                 Manage Cloudflare DNS records for this server.
                             </p>
                             {subdomainLimit > 0 && subdomains.length > 0 && (
-                                <p css={tw`text-sm text-neutral-300 mt-1`}>
+                                <p
+                                    css={tw`inline-flex mt-3 items-center rounded bg-neutral-800 px-3 py-1 text-xs font-semibold text-neutral-200 border border-neutral-600`}
+                                >
                                     {subdomains.length} of {subdomainLimit} subdomains have been allocated.
                                 </p>
                             )}
@@ -78,12 +81,12 @@ export default () => {
                     </div>
                     <TableList>
                         <tr>
-                            <th>FQDN</th>
-                            <th>Type</th>
-                            <th>Target</th>
-                            <th>Minecraft Address</th>
-                            <th>Proxy</th>
-                            <th>Status</th>
+                            <th css={tw`text-xs font-semibold uppercase tracking-wide`}>FQDN</th>
+                            <th css={tw`text-xs font-semibold uppercase tracking-wide`}>Type</th>
+                            <th css={tw`text-xs font-semibold uppercase tracking-wide`}>Target</th>
+                            <th css={tw`text-xs font-semibold uppercase tracking-wide`}>Minecraft Address</th>
+                            <th css={tw`text-xs font-semibold uppercase tracking-wide`}>Proxy</th>
+                            <th css={tw`text-xs font-semibold uppercase tracking-wide`}>Status</th>
                             <th></th>
                         </tr>
                         {subdomains.length > 0 ? (
