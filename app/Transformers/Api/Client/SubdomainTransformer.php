@@ -21,6 +21,8 @@ class SubdomainTransformer extends BaseClientTransformer
             'fqdn' => $model->fqdn,
             'type' => $model->type,
             'content' => $model->content,
+            'minecraft_address' => $model->cloudflare_srv_record_id ? $model->fqdn : null,
+            'srv_port' => $model->srv_port,
             'proxied' => $model->proxied,
             'status' => $model->status,
             'error_message' => $model->error_message,

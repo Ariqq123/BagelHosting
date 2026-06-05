@@ -15,6 +15,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string $content
  * @property bool $proxied
  * @property string|null $cloudflare_record_id
+ * @property string|null $cloudflare_srv_record_id
+ * @property int|null $srv_port
  * @property string $status
  * @property string|null $error_message
  * @property Server $server
@@ -39,6 +41,8 @@ class Subdomain extends Model
         'content',
         'proxied',
         'cloudflare_record_id',
+        'cloudflare_srv_record_id',
+        'srv_port',
         'status',
         'error_message',
     ];
@@ -48,6 +52,7 @@ class Subdomain extends Model
         'user_id' => 'integer',
         'subdomain_domain_id' => 'integer',
         'proxied' => 'boolean',
+        'srv_port' => 'integer',
     ];
 
     public static array $validationRules = [
@@ -60,6 +65,8 @@ class Subdomain extends Model
         'content' => 'required|string|max:191',
         'proxied' => 'boolean',
         'cloudflare_record_id' => 'nullable|string|max:191',
+        'cloudflare_srv_record_id' => 'nullable|string|max:191',
+        'srv_port' => 'nullable|integer|between:1,65535',
         'status' => 'required|string|in:active,error',
         'error_message' => 'nullable|string',
     ];

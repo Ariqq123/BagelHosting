@@ -75,6 +75,16 @@ export default ({ subdomain, onDeleted }: Props) => {
                         <p>{subdomain.content}</p>
                     </CopyOnClick>
                 </td>
+                <td>
+                    {subdomain.minecraftAddress ? (
+                        <CopyOnClick text={subdomain.minecraftAddress}>
+                            <p>{subdomain.minecraftAddress}</p>
+                        </CopyOnClick>
+                    ) : (
+                        <span css={tw`text-neutral-400`}>None</span>
+                    )}
+                    {subdomain.srvPort && <p css={tw`text-xs text-neutral-300 mt-1`}>SRV port {subdomain.srvPort}</p>}
+                </td>
                 <td>{subdomain.proxied ? 'Proxied' : 'DNS only'}</td>
                 <td>{subdomain.status}</td>
                 <td className={'w-1'}>

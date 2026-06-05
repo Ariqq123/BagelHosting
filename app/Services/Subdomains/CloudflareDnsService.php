@@ -53,28 +53,31 @@ class CloudflareDnsService
      */
     public function createRecord(SubdomainDomain $domain, string $type, string $fqdn, string $content, bool $proxied): string
     {
-        $response = Http::withToken($domain->cloudflare_token)
-            ->acceptJson()
-            ->asJson()
-            ->post(sprintf('%s/zones/%s/dns_records', self::BASE_URL, $domain->cloudflare_zone_id), [
-                'type' => $type,
-                'name' => $fqdn,
-                'content' => $content,
-                'proxied' => $proxied,
-                'ttl' => 1,
-            ]);
+        return $this->createDnsRecord($domain, [
+            'type' => $type,
+            'name' => $fqdn,
+            'content' => $content,
+            'proxied' => $proxied,
+            'ttl' => 1,
+        ], 'Cloudflare failed to create the DNS record.');
+    }
 
-        $payload = $response->json() ?? [];
-        if (!$response->successful() || !Arr::get($payload, 'success')) {
-            throw new DisplayException($this->getErrorMessage($payload, 'Cloudflare failed to create the DNS record.'));
-        }
-
-        $id = Arr::get($payload, 'result.id');
-        if (!is_string($id) || $id === '') {
-            throw new DisplayException('Cloudflare did not return a DNS record ID.');
-        }
-
-        return $id;
+    /**
+     * @throws DisplayException
+     */
+    public function createMinecraftSrvRecord(SubdomainDomain $domain, string $fqdn, int $port): string
+    {
+        return $this->createDnsRecord($domain, [
+            'type' => 'SRV',
+            'name' => sprintf('_minecraft._tcp.%s', $fqdn),
+            'data' => [
+                'priority' => 0,
+                'weight' => 0,
+                'port' => $port,
+                'target' => $fqdn,
+            ],
+            'ttl' => 1,
+        ], 'Cloudflare failed to create the Minecraft SRV record.');
     }
 
     /**
@@ -112,6 +115,29 @@ class CloudflareDnsService
         if (!$response->successful() || !Arr::get($payload, 'success')) {
             throw new DisplayException($this->getErrorMessage($payload, 'Cloudflare failed to delete the DNS record.'));
         }
+    }
+
+    /**
+     * @throws DisplayException
+     */
+    private function createDnsRecord(SubdomainDomain $domain, array $data, string $fallback): string
+    {
+        $response = Http::withToken($domain->cloudflare_token)
+            ->acceptJson()
+            ->asJson()
+            ->post(sprintf('%s/zones/%s/dns_records', self::BASE_URL, $domain->cloudflare_zone_id), $data);
+
+        $payload = $response->json() ?? [];
+        if (!$response->successful() || !Arr::get($payload, 'success')) {
+            throw new DisplayException($this->getErrorMessage($payload, $fallback));
+        }
+
+        $id = Arr::get($payload, 'result.id');
+        if (!is_string($id) || $id === '') {
+            throw new DisplayException('Cloudflare did not return a DNS record ID.');
+        }
+
+        return $id;
     }
 
     private function getErrorMessage(array $payload, string $fallback): string

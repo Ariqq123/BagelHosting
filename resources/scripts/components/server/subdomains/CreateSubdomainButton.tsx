@@ -140,7 +140,8 @@ export default ({ domains, onCreated }: Props) => {
                                 <div css={tw`min-w-0`}>
                                     <h2 css={tw`font-header text-xl font-medium text-gray-50`}>Create subdomain</h2>
                                     <p css={tw`text-sm text-neutral-300 mt-1`}>
-                                        Point a hostname at this server through Cloudflare DNS.
+                                        Point a hostname at this server through Cloudflare DNS. A records also create a
+                                        Minecraft SRV record so players can connect without typing the port.
                                     </p>
                                 </div>
                             </div>
