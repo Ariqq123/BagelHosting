@@ -45,7 +45,24 @@ class SubdomainManagementService
             }
 
             $content = $this->getRecordContent($server, $domain, $type);
-            $recordId = $this->cloudflare->createRecord($domain, $type, $fqdn, $content, $domain->proxied);
+            $proxied = $type === 'A' ? false : $domain->proxied;
+            $recordId = $this->cloudflare->createRecord($domain, $type, $fqdn, $content, $proxied);
+            $srvRecordId = null;
+            $srvPort = null;
+
+            if ($type === 'A') {
+                $srvPort = $server->allocation?->port;
+                if (!$srvPort) {
+                    throw new DisplayException('This server does not have a primary allocation port.');
+                }
+
+                try {
+                    $srvRecordId = $this->cloudflare->createMinecraftSrvRecord($domain, $fqdn, $srvPort);
+                } catch (DisplayException $exception) {
+                    $this->cloudflare->deleteRecord($domain, $recordId);
+                    throw $exception;
+                }
+            }
 
             return Subdomain::query()->create([
                 'server_id' => $server->id,
@@ -55,8 +72,10 @@ class SubdomainManagementService
                 'fqdn' => $fqdn,
                 'type' => $type,
                 'content' => $content,
-                'proxied' => $domain->proxied,
+                'proxied' => $proxied,
                 'cloudflare_record_id' => $recordId,
+                'cloudflare_srv_record_id' => $srvRecordId,
+                'srv_port' => $srvPort,
                 'status' => Subdomain::STATUS_ACTIVE,
                 'error_message' => null,
             ]);
@@ -69,6 +88,10 @@ class SubdomainManagementService
     public function delete(Subdomain $subdomain): void
     {
         try {
+            if (!empty($subdomain->cloudflare_srv_record_id)) {
+                $this->cloudflare->deleteRecord($subdomain->domain, $subdomain->cloudflare_srv_record_id);
+            }
+
             if (!empty($subdomain->cloudflare_record_id)) {
                 $this->cloudflare->deleteRecord($subdomain->domain, $subdomain->cloudflare_record_id);
             }

@@ -80,7 +80,8 @@ export default () => {
                         <tr>
                             <th>FQDN</th>
                             <th>Type</th>
-                            <th>Content</th>
+                            <th>Target</th>
+                            <th>Minecraft Address</th>
                             <th>Proxy</th>
                             <th>Status</th>
                             <th></th>
@@ -91,7 +92,7 @@ export default () => {
                             ))
                         ) : (
                             <tr>
-                                <td colSpan={6} css={tw`text-center text-sm`}>
+                                <td colSpan={7} css={tw`text-center text-sm`}>
                                     {subdomainLimit > 0
                                         ? 'No subdomains have been created.'
                                         : 'Subdomains cannot be created for this server.'}

@@ -13,6 +13,8 @@ export interface ServerSubdomain {
     fqdn: string;
     type: string;
     content: string;
+    minecraftAddress: string | null;
+    srvPort: number | null;
     proxied: boolean;
     status: string;
     errorMessage: string | null;
@@ -36,6 +38,8 @@ export const rawDataToServerSubdomain = (data: any): ServerSubdomain => ({
     fqdn: data.fqdn,
     type: data.type,
     content: data.content,
+    minecraftAddress: data.minecraft_address,
+    srvPort: data.srv_port,
     proxied: data.proxied,
     status: data.status,
     errorMessage: data.error_message,
