@@ -1,13 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import tw from 'twin.macro';
+import { animate, stagger } from 'animejs';
 import { Actions, useStoreActions } from 'easy-peasy';
-import { CodeIcon, ExclamationIcon } from '@heroicons/react/outline';
+import { CheckCircleIcon, CodeIcon, ExclamationIcon } from '@heroicons/react/outline';
 import FlashMessageRender from '@/components/FlashMessageRender';
 import ServerContentBlock from '@/components/elements/ServerContentBlock';
-import TitledGreyBox from '@/components/elements/TitledGreyBox';
 import Spinner from '@/components/elements/Spinner';
 import Input from '@/components/elements/Input';
-import Select from '@/components/elements/Select';
 import InputSpinner from '@/components/elements/InputSpinner';
 import { Button } from '@/components/elements/button';
 import { Dialog } from '@/components/elements/dialog';
@@ -26,15 +25,18 @@ const FLASH_KEY = 'server:versions';
 
 const fallbackLabel = (software?: ServerVersionSoftware) => (software?.type || software?.name || 'J').charAt(0);
 
-const SoftwareIcon = ({ software }: { software?: ServerVersionSoftware }) => {
+const SoftwareIcon = ({ software, large }: { software?: ServerVersionSoftware; large?: boolean }) => {
+    const size = large ? tw`h-10 w-10` : tw`h-7 w-7`;
+    const imageSize = large ? tw`h-8 w-8` : tw`h-5 w-5`;
+
     if (software?.icon) {
         return (
             <span
                 title={software.name}
-                css={tw`inline-flex h-6 w-6 flex-shrink-0 items-center justify-center overflow-hidden rounded`}
+                css={[tw`inline-flex flex-shrink-0 items-center justify-center overflow-hidden rounded`, size]}
                 style={{ backgroundColor: software.color ?? undefined }}
             >
-                <img src={software.icon} alt={software.name} css={tw`h-5 w-5 object-contain`} />
+                <img src={software.icon} alt={software.name} css={[tw`object-contain`, imageSize]} />
             </span>
         );
     }
@@ -42,7 +44,7 @@ const SoftwareIcon = ({ software }: { software?: ServerVersionSoftware }) => {
     return (
         <span
             title={software?.name ?? 'Server jar'}
-            css={tw`inline-flex h-6 w-6 flex-shrink-0 items-center justify-center rounded bg-neutral-300 text-xs font-bold text-neutral-900`}
+            css={[tw`inline-flex flex-shrink-0 items-center justify-center rounded bg-neutral-300 font-bold text-neutral-900`, size]}
             style={{ backgroundColor: software?.color ?? undefined }}
         >
             {fallbackLabel(software)}
@@ -52,6 +54,7 @@ const SoftwareIcon = ({ software }: { software?: ServerVersionSoftware }) => {
 
 const VersionsContainer = () => {
     const uuid = ServerContext.useStoreState((state) => state.server.data!.uuid);
+    const shellRef = useRef<HTMLDivElement>(null);
     const { addFlash, clearFlashes } = useStoreActions((actions: Actions<ApplicationStore>) => actions.flashes);
     const [data, setData] = useState<ServerVersionsResponse>();
     const [error, setError] = useState<Error>();
@@ -84,6 +87,41 @@ const VersionsContainer = () => {
         clearFlashes(FLASH_KEY);
         load();
     }, []);
+
+    useEffect(() => {
+        if (!data || !shellRef.current) return;
+
+        animate(shellRef.current, {
+            opacity: [0, 1],
+            translateY: [16, 0],
+            duration: 420,
+            ease: 'outCubic',
+        });
+
+        animate(shellRef.current.querySelectorAll('.software-tile'), {
+            opacity: [0, 1],
+            translateY: [14, 0],
+            scale: [0.96, 1],
+            delay: stagger(45),
+            duration: 360,
+            ease: 'outBack',
+        });
+    }, [data]);
+
+    const selectSoftware = (software: ServerVersionSoftware) => {
+        setSelectedEggId(software.id);
+
+        if (!shellRef.current) return;
+
+        const tile = shellRef.current.querySelector(`[data-software-id="${software.id}"]`);
+        if (tile) {
+            animate(tile, {
+                scale: [0.98, 1.03, 1],
+                duration: 360,
+                ease: 'outElastic(1, .7)',
+            });
+        }
+    };
 
     const install = () => {
         if (!selectedEggId) return;
@@ -134,70 +172,111 @@ const VersionsContainer = () => {
                 This will reinstall the server using {selectedSoftware?.name ?? 'the selected software'} {version.trim()}.
                 Existing files can be replaced by the egg install script.
             </Dialog.Confirm>
-            <div css={tw`mx-auto w-full max-w-xl`}>
-                <TitledGreyBox title={'Version changer'} css={tw`relative`}>
-                    <InputSpinner visible={loading || installing}>
-                        <p css={tw`mb-5 text-sm text-neutral-200`}>
-                            Easily switch your server to a different Minecraft version with just one click.
-                        </p>
-                        <div css={tw`space-y-3`}>
-                            <div css={tw`relative`}>
-                                <span css={tw`pointer-events-none absolute left-3 top-1/2 z-10 -translate-y-1/2`}>
-                                    <SoftwareIcon software={selectedSoftware} />
-                                </span>
-                                <Select
-                                    css={tw`pl-12`}
-                                    value={selectedEggId ?? ''}
-                                    disabled={!data?.software.length || installing}
-                                    onChange={(event) => setSelectedEggId(Number(event.currentTarget.value))}
-                                >
-                                    {data?.software.map((software) => (
-                                        <option key={software.id} value={software.id}>
-                                            {software.type} - {software.name}
-                                        </option>
-                                    ))}
-                                </Select>
-                            </div>
-                            <div>
-                                <Input
-                                    value={version}
-                                    disabled={installing}
-                                    hasError={invalidVersion}
-                                    onChange={(event) => setVersion(event.currentTarget.value)}
-                                    placeholder={'Select a version'}
-                                />
-                            </div>
-                            <div css={tw`rounded border border-neutral-600 bg-neutral-700/40 p-4`}>
-                                <div css={tw`mb-2 flex items-center text-sm text-red-300`}>
-                                    <ExclamationIcon css={tw`mr-2 h-5 w-5`} />
-                                    <span>Danger zone</span>
+
+            <div ref={shellRef} css={tw`mx-auto max-w-5xl opacity-0`}>
+                <div css={tw`mb-6 flex flex-col gap-3 md:flex-row md:items-end md:justify-between`}>
+                    <div>
+                        <p css={tw`text-xs uppercase text-neutral-400`}>Minecraft software</p>
+                        <h2 css={tw`mt-1 text-2xl font-semibold text-neutral-50`}>Version changer</h2>
+                    </div>
+                    <p css={tw`max-w-lg text-sm text-neutral-300`}>
+                        Pick server software, choose a Minecraft version, then reinstall from MCJars metadata.
+                    </p>
+                </div>
+
+                <div css={tw`grid gap-6 lg:grid-cols-5`}>
+                    <div css={tw`lg:col-span-3`}>
+                        <div css={tw`grid gap-3 sm:grid-cols-2`}>
+                            {data?.software.map((software) => {
+                                const selected = software.id === selectedEggId;
+
+                                return (
+                                    <button
+                                        key={software.id}
+                                        type={'button'}
+                                        data-software-id={software.id}
+                                        className={'software-tile'}
+                                        css={[
+                                            tw`min-h-[104px] rounded border border-neutral-700 bg-neutral-800 p-4 text-left transition-colors duration-150 hover:border-primary-400 hover:bg-neutral-700 focus:outline-none focus:ring-2 focus:ring-primary-400`,
+                                            selected && tw`border-primary-400 bg-neutral-700`,
+                                        ]}
+                                        onClick={() => selectSoftware(software)}
+                                    >
+                                        <div css={tw`flex items-start justify-between gap-3`}>
+                                            <div css={tw`flex items-center gap-3`}>
+                                                <SoftwareIcon software={software} />
+                                                <div>
+                                                    <p css={tw`font-semibold text-neutral-50`}>{software.name}</p>
+                                                    <p css={tw`text-xs uppercase text-neutral-400`}>{software.type}</p>
+                                                </div>
+                                            </div>
+                                            {selected && <CheckCircleIcon css={tw`h-5 w-5 text-primary-300`} />}
+                                        </div>
+                                        <p css={tw`mt-3 line-clamp-2 text-xs text-neutral-300`}>{software.description}</p>
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </div>
+
+                    <div css={tw`lg:col-span-2`}>
+                        <InputSpinner visible={loading || installing}>
+                            <div css={tw`rounded border border-neutral-700 bg-neutral-800 p-5`}>
+                                <div css={tw`flex items-center gap-3`}>
+                                    <SoftwareIcon software={selectedSoftware} large />
+                                    <div css={tw`min-w-0`}>
+                                        <p css={tw`truncate font-semibold text-neutral-50`}>
+                                            {selectedSoftware?.name ?? 'Select software'}
+                                        </p>
+                                        <p css={tw`text-xs text-neutral-400`}>
+                                            Current: {data?.current.name ?? 'Unknown'} {data?.current.version ?? 'latest'}
+                                        </p>
+                                    </div>
                                 </div>
-                                <label css={tw`flex cursor-pointer items-start gap-3 text-sm text-neutral-200`}>
+
+                                <div css={tw`mt-5`}>
+                                    <label css={tw`mb-2 block text-xs uppercase text-neutral-400`}>Minecraft version</label>
                                     <Input
-                                        type={'checkbox'}
-                                        checked={resetConfirmed}
+                                        value={version}
                                         disabled={installing}
-                                        onChange={(event) => setResetConfirmed(event.currentTarget.checked)}
-                                        css={tw`mt-0.5`}
+                                        hasError={invalidVersion}
+                                        onChange={(event) => setVersion(event.currentTarget.value)}
+                                        placeholder={'latest'}
                                     />
-                                    <span>Reset the server, and delete all files (worlds, configs, plugins etc)</span>
-                                </label>
+                                    <p css={tw`mt-2 text-xs text-neutral-400`}>Use latest or a version like 1.21.4.</p>
+                                </div>
+
+                                <div css={tw`mt-5 rounded border border-red-900 bg-red-900/20 p-4`}>
+                                    <div css={tw`mb-2 flex items-center text-sm text-red-300`}>
+                                        <ExclamationIcon css={tw`mr-2 h-5 w-5`} />
+                                        <span>Reinstall required</span>
+                                    </div>
+                                    <label css={tw`flex cursor-pointer items-start gap-3 text-sm text-neutral-200`}>
+                                        <Input
+                                            type={'checkbox'}
+                                            checked={resetConfirmed}
+                                            disabled={installing}
+                                            onChange={(event) => setResetConfirmed(event.currentTarget.checked)}
+                                            css={tw`mt-0.5`}
+                                        />
+                                        <span>Reset the server, and delete all files (worlds, configs, plugins etc)</span>
+                                    </label>
+                                </div>
+
+                                <div css={tw`mt-5 flex items-center justify-between gap-4`}>
+                                    <p css={tw`text-xs text-neutral-400`}>Powered by MC Utils</p>
+                                    <Button
+                                        type={'button'}
+                                        disabled={!selectedEggId || invalidVersion || !resetConfirmed || installing}
+                                        onClick={() => setConfirmVisible(true)}
+                                    >
+                                        Install
+                                    </Button>
+                                </div>
                             </div>
-                        </div>
-                        <div css={tw`mt-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between`}>
-                            <p css={tw`text-sm text-neutral-200`}>
-                                Powered by <strong css={tw`font-semibold text-neutral-100`}>MC Utils</strong>
-                            </p>
-                            <Button
-                                type={'button'}
-                                disabled={!selectedEggId || invalidVersion || !resetConfirmed || installing}
-                                onClick={() => setConfirmVisible(true)}
-                            >
-                                Install
-                            </Button>
-                        </div>
-                    </InputSpinner>
-                </TitledGreyBox>
+                        </InputSpinner>
+                    </div>
+                </div>
             </div>
         </ServerContentBlock>
     );
