@@ -4,7 +4,6 @@ import { useStoreState } from 'easy-peasy';
 import ContentContainer from '@/components/elements/ContentContainer';
 import { CSSTransition } from 'react-transition-group';
 import tw from 'twin.macro';
-import parser from 'bbcode-to-react';
 import FlashMessageRender from '@/components/FlashMessageRender';
 
 export interface PageContentBlockProps {
@@ -13,9 +12,13 @@ export interface PageContentBlockProps {
     showFlashKey?: string;
 }
 
+import Attribution from '@blueprint/extends/Attribution';
+import BeforeSection from '@blueprint/components/Dashboard/Global/BeforeSection';
+import AfterSection from '@blueprint/components/Dashboard/Global/AfterSection';
+
 const PageContentBlock: React.FC<PageContentBlockProps> = ({ title, showFlashKey, className, children }) => {
     const copyright = useStoreState((state: ApplicationStore) => state.settings.data!.arix.copyright);
-    
+
     useEffect(() => {
         if (title) {
             document.title = title;
@@ -25,10 +28,12 @@ const PageContentBlock: React.FC<PageContentBlockProps> = ({ title, showFlashKey
     return (
         <CSSTransition timeout={150} classNames={'fade'} appear in>
             <div className={'px-4'}>
-                <ContentContainer css={tw`my-4 sm:mb-10 sm:mt-6`} className={className}>
+                <BeforeSection/>
+                <ContentContainer css={tw`mt-6 mb-4 sm:mt-8 sm:mb-10`} className={className}>
                     {showFlashKey && <FlashMessageRender byKey={showFlashKey} css={tw`mb-4`} />}
                     {children}
                 </ContentContainer>
+                <AfterSection/>
                 <ContentContainer css={tw`mb-4`}>
                     <p css={tw`text-center text-neutral-300 text-xs`}>
                         <a
@@ -40,22 +45,10 @@ const PageContentBlock: React.FC<PageContentBlockProps> = ({ title, showFlashKey
                             Pterodactyl&reg;
                         </a>
                         &nbsp;&copy; 2015 - {new Date().getFullYear()}
+                        <Attribution />
                     </p>
                     <p css={tw`text-center text-neutral-300 text-xs`}>
-                        {copyright == 'Designed by Weijers.one' ?
-                            <>
-                            Designed by
-                            <span className="px-1 py-[.35rem] font-semibold bg-gray-600 rounded scale-75 inline-block">W.1</span>
-                            <a
-                                rel={'noopener nofollow noreferrer'}
-                                href={'https://arix.gg'}
-                                target={'_blank'}
-                                css={tw`no-underline text-neutral-300 hover:text-neutral-100`}
-                            >
-                                Weijers.one
-                            </a>
-                            </>
-                        : parser.toReact(copyright)}
+                        {copyright}
                     </p>
                 </ContentContainer>
             </div>

@@ -4,20 +4,19 @@ import { useFlashKey } from '@/plugins/useFlash';
 import ServerContentBlock from '@/components/elements/ServerContentBlock';
 import { ServerContext } from '@/state/server';
 import AllocationRow from '@/components/server/network/AllocationRow';
-import { Button } from '@/components/elements/button/index';
+import Button from '@/components/elements/Button';
 import createServerAllocation from '@/api/server/network/createServerAllocation';
 import tw from 'twin.macro';
 import Can from '@/components/elements/Can';
-import TableList from '@/components/elements/TableList';
 import SpinnerOverlay from '@/components/elements/SpinnerOverlay';
 import getServerAllocations from '@/api/swr/getServerAllocations';
 import isEqual from 'react-fast-compare';
 import { useDeepCompareEffect } from '@/plugins/useDeepCompareEffect';
-import { GlobeIcon } from '@heroicons/react/outline';
-import { useTranslation } from 'react-i18next';
+
+import BeforeContent from '@blueprint/components/Server/Network/BeforeContent';
+import AfterContent from '@blueprint/components/Server/Network/AfterContent';
 
 const NetworkContainer = () => {
-    const { t } = useTranslation('arix/server/network');
     const [loading, setLoading] = useState(false);
     const uuid = ServerContext.useStoreState((state) => state.server.data!.uuid);
     const allocationLimit = ServerContext.useStoreState((state) => state.server.data!.featureLimits.allocations);
@@ -55,43 +54,33 @@ const NetworkContainer = () => {
     };
 
     return (
-        <ServerContentBlock showFlashKey={'server:network'} title={t('network')} icon={GlobeIcon}>
-        {!data ? (
-            <Spinner size={'large'} centered />
-        ) : (
-            <div className={'bg-gray-700 rounded-box backdrop'}>
-                <div className={'flex lg:flex-row flex-col gap-2 items-start justify-between px-6 pt-5 pb-1'}>
-                    <div>
-                        <p className={'text-medium text-gray-300'}>{t('manage-allocation')}</p>
-                        {allocationLimit > 0 && (
-                            <p css={tw`text-sm text-neutral-300 mt-1`}>
-                                {t('currently-using', { current: data.length, max: allocationLimit })}
-                            </p>
-                        )}
-                    </div>
-                    {allocationLimit > 0 && (
-                        <Can action={'allocation.create'}>
-                            <SpinnerOverlay visible={loading} />
-                            {allocationLimit > data.length && (
-                                <Button onClick={onCreateAllocation}>
-                                    {t('create-allocation')}
-                                </Button>
-                            )}
-                        </Can>
-                    )}
-                </div>
-                <TableList>
-                    <tr>
-                        <th>{t('IP')}</th>
-                        <th>{t('port')}</th>
-                        <th>{t('notes')}</th>
-                        <th></th>
-                    </tr>
+        <ServerContentBlock showFlashKey={'server:network'} title={'Network'}>
+            {!data ? (
+                <Spinner size={'large'} centered />
+            ) : (
+                <>
+                    <BeforeContent />
                     {data.map((allocation) => (
                         <AllocationRow key={`${allocation.ip}:${allocation.port}`} allocation={allocation} />
                     ))}
-                </TableList>
-            </div>
+                    {allocationLimit > 0 && (
+                        <Can action={'allocation.create'}>
+                            <SpinnerOverlay visible={loading} />
+                            <div css={tw`mt-6 sm:flex items-center justify-end`}>
+                                <p css={tw`text-sm text-neutral-300 mb-4 sm:mr-6 sm:mb-0`}>
+                                    You are currently using {data.length} of {allocationLimit} allowed allocations for
+                                    this server.
+                                </p>
+                                {allocationLimit > data.length && (
+                                    <Button css={tw`w-full sm:w-auto`} color={'primary'} onClick={onCreateAllocation}>
+                                        Create Allocation
+                                    </Button>
+                                )}
+                            </div>
+                        </Can>
+                    )}
+                    <AfterContent />
+                </>
             )}
         </ServerContentBlock>
     );

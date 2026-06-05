@@ -1,15 +1,18 @@
+@include('blueprint.dashboard.dashboard')
+@yield('blueprint.lib')
+
 <!DOCTYPE html>
 <html>
     <head>
         <title>{{ config('app.name', 'Pterodactyl') }}</title>
+
+        @yield('head')
 
         @section('meta')
             <meta charset="utf-8">
             <meta http-equiv="X-UA-Compatible" content="IE=edge">
             <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
             <meta name="csrf-token" content="{{ csrf_token() }}">
-            
-            <!-- meta data -->
 
             <meta name="theme-color" content="{{ $siteConfiguration['arix']['meta_color'] }}"/>
             <link rel="icon" type="image/x-icon" href="{{ $siteConfiguration['arix']['meta_favicon'] }}">
@@ -18,19 +21,17 @@
             <meta name="description" content="{{ $siteConfiguration['arix']['meta_description'] }}" />
 
             <meta property="og:type" content="website" />
-            <meta property="og:url" content="{{config('app.url', 'https://localhost')}}" />
+            <meta property="og:url" content="{{ config('app.url', 'https://localhost') }}" />
             <meta property="og:title" content="{{ $siteConfiguration['arix']['meta_title'] }}" />
             <meta property="og:description" content="{{ $siteConfiguration['arix']['meta_description'] }}" />
             <meta property="og:image" content="{{ $siteConfiguration['arix']['meta_image'] }}" />
 
             <meta property="twitter:card" content="summary_large_image" />
-            <meta property="twitter:url" content="{{config('app.url', 'https://localhost')}}" />
+            <meta property="twitter:url" content="{{ config('app.url', 'https://localhost') }}" />
             <meta property="twitter:title" content="{{ $siteConfiguration['arix']['meta_title'] }}" />
             <meta property="twitter:description" content="{{ $siteConfiguration['arix']['meta_description'] }}" />
             <meta property="twitter:image" content="{{ $siteConfiguration['arix']['meta_image'] }}" />
 
-            <!-- meta data -->
-            <!--
             <link rel="apple-touch-icon" sizes="180x180" href="/favicons/apple-touch-icon.png?v=616942">
             <link rel="icon" type="image/png" href="/favicons/favicon-32x32.png" sizes="32x32">
             <link rel="icon" type="image/png" href="/favicons/favicon-16x16.png" sizes="16x16">
@@ -38,7 +39,6 @@
             <link rel="mask-icon" href="/favicons/safari-pinned-tab.svg" color="#bc6e3c">
             <link rel="shortcut icon" href="/favicons/favicon.ico">
             <meta name="msapplication-config" content="/favicons/browserconfig.xml">
-        -->
         @show
 
         @section('user-data')
@@ -53,6 +53,7 @@
                 </script>
             @endif
         @show
+
         <style>
             :root{
                 <?php if ($siteConfiguration['arix']['borderInput'] === 'true') {
@@ -146,6 +147,8 @@
             @yield('above-container')
             @yield('container')
             @yield('below-container')
+
+            @yield('blueprint.wrappers')
         @show
         @section('scripts')
             {!! $asset->js('main.js') !!}

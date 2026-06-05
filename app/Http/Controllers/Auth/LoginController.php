@@ -53,6 +53,12 @@ class LoginController extends AbstractLoginController
             $this->sendFailedLoginResponse($request, $user);
         }
 
+        if ($user->password_setup_pending) {
+            throw new \Pterodactyl\Exceptions\DisplayException(
+                'Finish setting your password from the email we sent before signing in.'
+            );
+        }
+
         if (!$user->use_totp) {
             return $this->sendLoginResponse($user, $request);
         }

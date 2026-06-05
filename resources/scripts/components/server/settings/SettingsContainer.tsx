@@ -14,11 +14,11 @@ import isEqual from 'react-fast-compare';
 import CopyOnClick from '@/components/elements/CopyOnClick';
 import { ip } from '@/lib/formatters';
 import { Button } from '@/components/elements/button/index';
-import { CogIcon } from '@heroicons/react/outline';
-import { useTranslation } from 'react-i18next';
+
+import BeforeContent from '@blueprint/components/Server/Settings/BeforeContent';
+import AfterContent from '@blueprint/components/Server/Settings/AfterContent';
 
 export default () => {
-    const { t } = useTranslation('arix/server/settings');
     const username = useStoreState((state) => state.user.data!.username);
     const id = ServerContext.useStoreState((state) => state.server.data!.id);
     const uuid = ServerContext.useStoreState((state) => state.server.data!.uuid);
@@ -26,20 +26,21 @@ export default () => {
     const sftp = ServerContext.useStoreState((state) => state.server.data!.sftpDetails, isEqual);
 
     return (
-        <ServerContentBlock title={t('settings')} icon={CogIcon}>
+        <ServerContentBlock title={'Settings'}>
             <FlashMessageRender byKey={'settings'} css={tw`mb-4`} />
+            <BeforeContent />
             <div css={tw`md:flex`}>
                 <div css={tw`w-full md:flex-1 md:mr-10`}>
                     <Can action={'file.sftp'}>
-                        <TitledGreyBox title={t('sftp.title')} css={tw`mb-6 md:mb-10`}>
+                        <TitledGreyBox title={'SFTP Details'} css={tw`mb-6 md:mb-10`}>
                             <div>
-                                <Label>{t('sftp.server-address')}</Label>
+                                <Label>Server Address</Label>
                                 <CopyOnClick text={`sftp://${ip(sftp.ip)}:${sftp.port}`}>
                                     <Input type={'text'} value={`sftp://${ip(sftp.ip)}:${sftp.port}`} readOnly />
                                 </CopyOnClick>
                             </div>
                             <div css={tw`mt-6`}>
-                                <Label>{t('sftp.username')}</Label>
+                                <Label>Username</Label>
                                 <CopyOnClick text={`${username}.${id}`}>
                                     <Input type={'text'} value={`${username}.${id}`} readOnly />
                                 </CopyOnClick>
@@ -48,26 +49,26 @@ export default () => {
                                 <div css={tw`flex-1`}>
                                     <div css={tw`border-l-4 border-cyan-500 p-3`}>
                                         <p css={tw`text-xs text-neutral-200`}>
-                                            {t('sftp.description')}
+                                            Your SFTP password is the same as the password you use to access this panel.
                                         </p>
                                     </div>
                                 </div>
                                 <div css={tw`ml-4`}>
                                     <a href={`sftp://${username}.${id}@${ip(sftp.ip)}:${sftp.port}`}>
-                                        <Button.Text variant={Button.Variants.Secondary}>{t('sftp.launch-sftp')}</Button.Text>
+                                        <Button.Text variant={Button.Variants.Secondary}>Launch SFTP</Button.Text>
                                     </a>
                                 </div>
                             </div>
                         </TitledGreyBox>
                     </Can>
-                    <TitledGreyBox title={t('debug.title')} css={tw`mb-6 md:mb-10`}>
+                    <TitledGreyBox title={'Debug Information'} css={tw`mb-6 md:mb-10`}>
                         <div css={tw`flex items-center justify-between text-sm`}>
-                            <p>{t('debug.node')}</p>
+                            <p>Node</p>
                             <code css={tw`font-mono bg-neutral-900 rounded py-1 px-2`}>{node}</code>
                         </div>
                         <CopyOnClick text={uuid}>
                             <div css={tw`flex items-center justify-between mt-2 text-sm`}>
-                                <p>{t('debug.server-id')}</p>
+                                <p>Server ID</p>
                                 <code css={tw`font-mono bg-neutral-900 rounded py-1 px-2`}>{uuid}</code>
                             </div>
                         </CopyOnClick>
@@ -84,6 +85,7 @@ export default () => {
                     </Can>
                 </div>
             </div>
+            <AfterContent />
         </ServerContentBlock>
     );
 };

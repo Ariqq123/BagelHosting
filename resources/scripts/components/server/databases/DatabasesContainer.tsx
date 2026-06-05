@@ -9,14 +9,14 @@ import CreateDatabaseButton from '@/components/server/databases/CreateDatabaseBu
 import Can from '@/components/elements/Can';
 import useFlash from '@/plugins/useFlash';
 import tw from 'twin.macro';
-import TableList from '@/components/elements/TableList';
+import Fade from '@/components/elements/Fade';
 import ServerContentBlock from '@/components/elements/ServerContentBlock';
 import { useDeepMemoize } from '@/plugins/useDeepMemoize';
-import { DatabaseIcon } from '@heroicons/react/outline';
-import { useTranslation } from 'react-i18next';
+
+import BeforeContent from '@blueprint/components/Server/Databases/BeforeContent';
+import AfterContent from '@blueprint/components/Server/Databases/AfterContent';
 
 export default () => {
-    const { t } = useTranslation('arix/server/databases');
     const uuid = ServerContext.useStoreState((state) => state.server.data!.uuid);
     const databaseLimit = ServerContext.useStoreState((state) => state.server.data!.featureLimits.databases);
 
@@ -40,54 +40,45 @@ export default () => {
     }, []);
 
     return (
-        <ServerContentBlock title={t('databases')} icon={DatabaseIcon}>
+        <ServerContentBlock title={'Databases'}>
             <FlashMessageRender byKey={'databases'} css={tw`mb-4`} />
-
             {!databases.length && loading ? (
                 <Spinner size={'large'} centered />
             ) : (
-                <div className={'bg-gray-700 rounded-box backdrop'}>
-                    <div className={'flex lg:flex-row flex-col gap-2 items-start justify-between px-6 pt-5 pb-1'}>
-                        <div>
-                            <p className={'text-medium text-gray-300'}>{t('manage-databases')}</p>
-                            {databaseLimit > 0 && databases.length > 0 && (
-                                <p css={tw`text-sm text-neutral-300 mt-1`}>
-                                    {t('have-been-allocated', { current: databases.length, max: databaseLimit })}
-                                </p>
-                            )}
-                        </div>
-                        <Can action={'database.create'}>
-                            {databaseLimit > 0 && databaseLimit !== databases.length && (
-                                <CreateDatabaseButton />
-                            )}
-                        </Can>
-                    </div>
-                    <TableList>
-                        <tr>
-                            <th>{t('name')}</th>
-                            <th>{t('username')}</th>
-                            <th>{t('endpoint')}</th>
-                            <th></th>
-                        </tr>
-                            {databases.length > 0 ? (
-                                databases.map((database, index) => (
-                                    <DatabaseRow
-                                        key={database.id}
-                                        database={database}
-                                        className={index > 0 ? 'mt-1' : undefined}
-                                    />
-                                ))
-                            ) : (
-                            <tr>
-                                <td colSpan={5} css={tw`text-center text-sm`}>
-                                    {databaseLimit > 0
-                                        ? t('no-databases')
-                                        : t('cannot-be-created')}
-                                </td>
-                            </tr>
+                <Fade timeout={150}>
+                    <>
+                        <BeforeContent />
+                        {databases.length > 0 ? (
+                            databases.map((database, index) => (
+                                <DatabaseRow
+                                    key={database.id}
+                                    database={database}
+                                    className={index > 0 ? 'mt-1' : undefined}
+                                />
+                            ))
+                        ) : (
+                            <p css={tw`text-center text-sm text-neutral-300`}>
+                                {databaseLimit > 0
+                                    ? 'It looks like you have no databases.'
+                                    : 'Databases cannot be created for this server.'}
+                            </p>
                         )}
-                    </TableList>
-                </div>
+                        <Can action={'database.create'}>
+                            <div css={tw`mt-6 flex items-center justify-end`}>
+                                {databaseLimit > 0 && databases.length > 0 && (
+                                    <p css={tw`text-sm text-neutral-300 mb-4 sm:mr-6 sm:mb-0`}>
+                                        {databases.length} of {databaseLimit} databases have been allocated to this
+                                        server.
+                                    </p>
+                                )}
+                                {databaseLimit > 0 && databaseLimit !== databases.length && (
+                                    <CreateDatabaseButton css={tw`flex justify-end mt-6`} />
+                                )}
+                            </div>
+                        </Can>
+                        <AfterContent />
+                    </>
+                </Fade>
             )}
         </ServerContentBlock>
     );

@@ -31,7 +31,7 @@ class ServerTransformer extends BaseClientTransformer
      */
     public function transform(Server $server): array
     {
-        /** @var \Pterodactyl\Services\Servers\StartupCommandService $service */
+        /** @var StartupCommandService $service */
         $service = Container::getInstance()->make(StartupCommandService::class);
 
         $user = $this->request->user();
@@ -43,12 +43,6 @@ class ServerTransformer extends BaseClientTransformer
             'uuid' => $server->uuid,
             'name' => $server->name,
             'node' => $server->node->name,
-            'node_alert' => $server->node->alert,
-            'daemon_text' => $server->node->daemon_text,
-            'container_text' => $server->node->container_text,
-            'egg_image' => $server->egg->image,
-            'nest_id' => $server->nest_id,
-            'egg_id' => $server->egg_id,
             'is_node_under_maintenance' => $server->node->isUnderMaintenance(),
             'sftp_details' => [
                 'ip' => $server->node->fqdn,
@@ -71,7 +65,6 @@ class ServerTransformer extends BaseClientTransformer
                 'databases' => $server->database_limit,
                 'allocations' => $server->allocation_limit,
                 'backups' => $server->backup_limit,
-                'subdomains' => $server->subdomain_limit,
             ],
             'status' => $server->status,
             // This field is deprecated, please use "status".
@@ -79,6 +72,11 @@ class ServerTransformer extends BaseClientTransformer
             // This field is deprecated, please use "status".
             'is_installing' => !$server->isInstalled(),
             'is_transferring' => !is_null($server->transfer),
+
+            // Blueprint-related fields.
+            'BlueprintFramework' => [
+                'egg_id' => $server->egg_id,
+            ],
         ];
     }
 

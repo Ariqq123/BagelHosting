@@ -22,15 +22,14 @@ import Input from '@/components/elements/Input';
 import { restoreServerBackup } from '@/api/server/backups';
 import http, { httpErrorToHuman } from '@/api/http';
 import { Dialog } from '@/components/elements/dialog';
-import { LuCloudDownload, LuArchiveRestore, LuLock, LuLockOpen, LuTrash2 } from "react-icons/lu";
-import { useTranslation } from 'react-i18next';
+
+import DropdownItems from '@blueprint/components/Server/Backups/DropdownItems';
 
 interface Props {
     backup: ServerBackup;
 }
 
 export default ({ backup }: Props) => {
-    const { t } = useTranslation('arix/server/backups');
     const uuid = ServerContext.useStoreState((state) => state.server.data!.uuid);
     const setServerFromState = ServerContext.useStoreActions((actions) => actions.server.setServerFromState);
     const [modal, setModal] = useState('');
@@ -125,20 +124,21 @@ export default ({ backup }: Props) => {
             <Dialog.Confirm
                 open={modal === 'unlock'}
                 onClose={() => setModal('')}
-                title={`${t('unlock')} "${backup.name}"`}
+                title={`Unlock "${backup.name}"`}
                 onConfirmed={onLockToggle}
             >
-                {t('no-longer-protected')}
+                This backup will no longer be protected from automated or accidental deletions.
             </Dialog.Confirm>
             <Dialog.Confirm
                 open={modal === 'restore'}
                 onClose={() => setModal('')}
-                confirm={t('Restore')}
+                confirm={'Restore'}
                 title={`Restore "${backup.name}"`}
                 onConfirmed={() => doRestorationAction()}
             >
                 <p>
-                    {t('your-server-will-be-stopped')}
+                    Your server will be stopped. You will not be able to control the power state, access the file
+                    manager, or create additional backups until completed.
                 </p>
                 <p css={tw`mt-4 -mb-2 bg-gray-700 p-3 rounded`}>
                     <label htmlFor={'restore_truncate'} css={tw`text-base flex items-center cursor-pointer`}>
@@ -150,18 +150,18 @@ export default ({ backup }: Props) => {
                             checked={truncate}
                             onChange={() => setTruncate((s) => !s)}
                         />
-                        {t('delete-all-files')}
+                        Delete all files before restoring backup.
                     </label>
                 </p>
             </Dialog.Confirm>
             <Dialog.Confirm
                 title={`Delete "${backup.name}"`}
-                confirm={t('continue')}
+                confirm={'Continue'}
                 open={modal === 'delete'}
                 onClose={() => setModal('')}
                 onConfirmed={doDeletion}
             >
-                {t('permanent operation')}
+                This is a permanent operation. The backup cannot be recovered once deleted.
             </Dialog.Confirm>
             <SpinnerOverlay visible={loading} fixed />
             {backup.isSuccessful ? (
@@ -178,38 +178,43 @@ export default ({ backup }: Props) => {
                     <div css={tw`text-sm`}>
                         <Can action={'backup.download'}>
                             <DropdownButtonRow onClick={doDownload}>
-                                <LuCloudDownload />
-                                <span css={tw`ml-2`}>{t('download')}</span>
+                                <FontAwesomeIcon fixedWidth icon={faCloudDownloadAlt} css={tw`text-xs`} />
+                                <span css={tw`ml-2`}>Download</span>
                             </DropdownButtonRow>
                         </Can>
                         <Can action={'backup.restore'}>
                             <DropdownButtonRow onClick={() => setModal('restore')}>
-                                <LuArchiveRestore />
-                                <span css={tw`ml-2`}>{t('restore')}</span>
+                                <FontAwesomeIcon fixedWidth icon={faBoxOpen} css={tw`text-xs`} />
+                                <span css={tw`ml-2`}>Restore</span>
                             </DropdownButtonRow>
                         </Can>
                         <Can action={'backup.delete'}>
                             <>
                                 <DropdownButtonRow onClick={onLockToggle}>
-                                    {backup.isLocked ? <LuLockOpen /> : <LuLock />}
-                                    <span css={tw`ml-2`}>{backup.isLocked ? t('unlock') : t('lock')}</span>
+                                    <FontAwesomeIcon
+                                        fixedWidth
+                                        icon={backup.isLocked ? faUnlock : faLock}
+                                        css={tw`text-xs mr-2`}
+                                    />
+                                    {backup.isLocked ? 'Unlock' : 'Lock'}
                                 </DropdownButtonRow>
                                 {!backup.isLocked && (
                                     <DropdownButtonRow danger onClick={() => setModal('delete')}>
-                                        <LuTrash2 />
-                                        <span css={tw`ml-2`}>{t('delete')}</span>
+                                        <FontAwesomeIcon fixedWidth icon={faTrashAlt} css={tw`text-xs`} />
+                                        <span css={tw`ml-2`}>Delete</span>
                                     </DropdownButtonRow>
                                 )}
                             </>
                         </Can>
                     </div>
+                    <DropdownItems />
                 </DropdownMenu>
             ) : (
                 <button
                     onClick={() => setModal('delete')}
                     css={tw`text-gray-200 transition-colors duration-150 hover:text-gray-100 p-2`}
                 >
-                    <LuTrash2 />
+                    <FontAwesomeIcon icon={faTrashAlt} />
                 </button>
             )}
         </>

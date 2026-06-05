@@ -12,8 +12,12 @@ import SpinnerOverlay from '@/components/elements/SpinnerOverlay';
 import UserAvatar from '@/components/UserAvatar';
 import DropdownMenu, { DropdownLinkRow, DropdownButtonRow } from '@/components/elements/DropdownMenu';
 import { UserCircleIcon, CogIcon, EyeIcon, MoonIcon, LogoutIcon, MenuIcon, XIcon, ServerIcon, SupportIcon } from '@heroicons/react/outline';
-import { FaDiscord } from "react-icons/fa";
+import { FaDiscord } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
+
+import BeforeNavigation from '@blueprint/components/Navigation/NavigationBar/BeforeNavigation';
+import AdditionalItems from '@blueprint/components/Navigation/NavigationBar/AdditionalItems';
+import AfterNavigation from '@blueprint/components/Navigation/NavigationBar/AfterNavigation';
 
 interface Props {
     children?: React.ReactNode;
@@ -153,8 +157,14 @@ export default ({ children }: Props) => {
     const searchComponent = useStoreState((state: ApplicationStore) => state.settings.data!.arix.searchComponent);
     const discord = useStoreState((state: ApplicationStore) => state.settings.data!.arix.discord);
     const support = useStoreState((state: ApplicationStore) => state.settings.data!.arix.support);
+    const hasDiscord = !!discord && discord !== 'none';
 
     useEffect(() => {
+        if (!hasDiscord) {
+            setGuildData(null);
+            return;
+        }
+
         const fetchData = async () => {
           try {
             const response = await fetch(`https://discord.com/api/guilds/${discord}/widget.json`);
@@ -171,10 +181,11 @@ export default ({ children }: Props) => {
         };
     
         fetchData();
-      }, []);
+      }, [discord, hasDiscord]);
 
     return (
         <>
+        <BeforeNavigation />
         <div className={`w-full px-4 overflow-x-auto !overflow-visible z-20 relative ${layout == 3 ? 'bg-gray-700 backdrop !border-0' : ''}`}>
             <div className={`mx-auto w-full flex items-center justify-between max-w-[1200px] py-2`}>
                 <div className="flex gap-x-10 items-center">
@@ -199,8 +210,9 @@ export default ({ children }: Props) => {
                     </div>
                 </div>
                 <RightNavigation>
-                    {discord && <>{guildData !== null ? <a href={guildData.instant_invite}><FaDiscord /> Discord</a> : <a href={''}><FaDiscord />Discord</a>}</>}
+                    {hasDiscord && <>{guildData !== null ? <a href={guildData.instant_invite}><FaDiscord /> Discord</a> : <a href={''}><FaDiscord />Discord</a>}</>}
                     {support && <a href={support}><SupportIcon className={'w-5'} />{t`supportcenter`}</a>}
+                    <AdditionalItems />
                     {layout == 3 && <ClientDropdown />}
                 </RightNavigation>
                 <button onClick={() => setIsOpen((isOpen) => !isOpen)} className={'lg:hidden'}>
@@ -229,7 +241,7 @@ export default ({ children }: Props) => {
                         <NavLink to={'/account'} exact>
                             <UserCircleIcon/> {t`account`}
                         </NavLink>
-                        {discord !== 'none' && <>{guildData !== null ? <a href={guildData.instant_invite}><FaDiscord /> Discord</a> : <a href={''}><FaDiscord />Discord</a>}</>}
+                        {hasDiscord && <>{guildData !== null ? <a href={guildData.instant_invite}><FaDiscord /> Discord</a> : <a href={''}><FaDiscord />Discord</a>}</>}
                         {support !== 'none' && <a href={support}><SupportIcon className={'w-5'} />{t`supportcenter`}</a>}
                     </div>
                     {children}
@@ -239,6 +251,7 @@ export default ({ children }: Props) => {
                 </div>
             </div>
         }
+        <AfterNavigation />
         </>
     );
 };

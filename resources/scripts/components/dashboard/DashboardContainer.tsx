@@ -13,13 +13,16 @@ import { usePersistedState } from '@/plugins/usePersistedState';
 import Switch from '@/components/elements/Switch';
 import tw from 'twin.macro';
 import useSWR from 'swr';
-import { LuChevronRight, LuCreditCard, LuLifeBuoy, LuRouter } from "react-icons/lu";
-import { RxDiscordLogo } from "react-icons/rx";
-import { FaDiscord } from "react-icons/fa";
+import { LuChevronRight, LuCreditCard, LuLifeBuoy, LuRouter } from 'react-icons/lu';
+import { RxDiscordLogo } from 'react-icons/rx';
+import { FaDiscord } from 'react-icons/fa';
 import { PaginatedResult } from '@/api/http';
 import Pagination from '@/components/elements/Pagination';
 import { useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+
+import BeforeContent from '@blueprint/components/Dashboard/Serverlist/BeforeContent';
+import AfterContent from '@blueprint/components/Dashboard/Serverlist/AfterContent';
 
 export default () => {
     const { t } = useTranslation('arix/dashboard');
@@ -39,6 +42,7 @@ export default () => {
     const status = useStoreState((state: ApplicationStore) => state.settings.data!.arix.status);
     const socialButtons = useStoreState((state: ApplicationStore) => state.settings.data!.arix.socialButtons);
     const serverRow = useStoreState((state: ApplicationStore) => state.settings.data!.arix.serverRow);
+    const hasDiscord = !!discord && discord !== 'none';
 
     const { data: servers, error } = useSWR<PaginatedResult<Server>>(
         ['/api/client/servers', showOnlyAdmin && rootAdmin, page],
@@ -65,6 +69,11 @@ export default () => {
     }, [error]);
 
     useEffect(() => {
+        if (!hasDiscord) {
+            setGuildData(null);
+            return;
+        }
+
         const fetchData = async () => {
             try {
                 const response = await fetch(`https://discord.com/api/guilds/${discord}/widget.json`);
@@ -73,7 +82,7 @@ export default () => {
                     throw new Error('Failed to fetch guild data');
                 }
 
-            const data = await response.json();
+                const data = await response.json();
                 setGuildData(data);
             } catch (error) {
                 console.error('Error fetching guild data:', error);
@@ -81,13 +90,14 @@ export default () => {
         };
 
         fetchData();
-    }, []);
+    }, [discord, hasDiscord]);
 
     return (
         <PageContentBlock title={'Dashboard'} showFlashKey={'dashboard'}>
+            <BeforeContent />
             {String(socialButtons) == 'true' &&
             <div className={'flex lg:gap-4 gap-2 lg:flex-row flex-col mb-4'}>
-                {discord &&
+                {hasDiscord &&
                     <a href={guildData ? guildData.instant_invite : ''} target="_blank" className={'group w-full bg-gray-700 backdrop rounded-box flex items-center justify-between px-6 py-5'}>
                         <div>
                             <p className={'font-medium text-gray-100 flex items-center'}>
@@ -126,7 +136,7 @@ export default () => {
                 {status &&
                     <a href={status} target="_blank" className={'group w-full bg-gray-700 backdrop rounded-box flex items-center justify-between px-6 py-5'}>
                         <div>
-                            <p className={'font-medium text-whgray-100ite flex items-center'}>
+                            <p className={'font-medium text-gray-100 flex items-center'}>
                                 {t('server-status')}
                                 <LuChevronRight className={'opacity-0 ml-0 group-hover:opacity-75 group-hover:ml-2 duration-300'} />
                             </p>
@@ -155,7 +165,7 @@ export default () => {
                         </div>
                     )}
                 </div>
-                {String(discordBox) == 'true' &&
+                {String(discordBox) == 'true' && hasDiscord &&
                 <a href={guildData ? guildData.instant_invite : ''} target="_blank" className={'group lg:max-w-[275px] w-full border border-[#6374AC] hover:border-[#97A8E0] rounded-box flex items-center justify-between px-6 py-5 duration-300'} css={'background-image:radial-gradient(circle, rgba(27,43,104,1) 0%, rgba(9,39,78,1) 100%);'}>
                     <div>
                         <span className={'font-light text-sm text-white/70'}>{guildData ? guildData.presence_count : '000'} {t('members-online')}</span>
@@ -190,6 +200,7 @@ export default () => {
                     </Pagination>
                 </div>
             )}
+            <AfterContent />
         </PageContentBlock>
     );
 };

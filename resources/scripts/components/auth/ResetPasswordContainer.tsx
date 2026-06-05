@@ -19,7 +19,7 @@ interface Values {
     passwordConfirmation: string;
 }
 
-export default ({ match, location }: RouteComponentProps<{ token: string }>) => {
+export default ({ match, location, history }: RouteComponentProps<{ token: string }>) => {
     const { t } = useTranslation('arix/auth');
     const [email, setEmail] = useState('');
 
@@ -33,9 +33,10 @@ export default ({ match, location }: RouteComponentProps<{ token: string }>) => 
     const submit = ({ password, passwordConfirmation }: Values, { setSubmitting }: FormikHelpers<Values>) => {
         clearFlashes();
         performPasswordReset(email, { token: match.params.token, password, passwordConfirmation })
-            .then(() => {
-                // @ts-expect-error this is valid
-                window.location = '/';
+            .then((response) => {
+                history.replace(response.redirectTo || '/auth/login', {
+                    flashMessage: 'Password set. You can now sign in.',
+                });
             })
             .catch((error) => {
                 console.error(error);

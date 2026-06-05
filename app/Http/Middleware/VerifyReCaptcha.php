@@ -49,7 +49,7 @@ class VerifyReCaptcha
         $this->dispatcher->dispatch(
             new FailedCaptcha(
                 $request->ip(),
-                !empty($result) ? ($result->hostname ?? null) : null
+                (string) (!empty($result) ? ($result->hostname ?? '') : '')
             )
         );
 

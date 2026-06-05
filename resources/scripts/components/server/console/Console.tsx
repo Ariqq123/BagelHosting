@@ -13,18 +13,16 @@ import useEventListener from '@/plugins/useEventListener';
 import { debounce } from 'debounce';
 import { usePersistedState } from '@/plugins/usePersistedState';
 import { SocketEvent, SocketRequest } from '@/components/server/events';
-import PowerButtons from '@/components/server/console/PowerButtons';
 import classNames from 'classnames';
-import copy from 'copy-to-clipboard';
-import { ArrowsExpandIcon, ClipboardIcon, ClipboardCheckIcon } from '@heroicons/react/outline'
 import { ChevronDoubleRightIcon } from '@heroicons/react/solid';
-import { useTranslation } from 'react-i18next';
+
+import CommandRow from '@blueprint/components/Server/Terminal/CommandRow';
 
 import 'xterm/css/xterm.css';
 import styles from './style.module.css';
 
 const theme = {
-    background: 'transparent',
+    background: th`colors.black`.toString(),
     cursor: 'transparent',
     black: th`colors.black`.toString(),
     red: '#E54B4B',
@@ -55,19 +53,8 @@ const terminalProps: ITerminalOptions = {
     theme: theme,
 };
 
-interface Props {
-    fullConsole?: boolean;
-}
-
-export default ({ fullConsole }: Props) => {
-    const { t } = useTranslation('arix/server/console');
-    const [consoleLog, setConsoleLog] = useState<string[]>([]);
-    const [isCopied, setCopied] = useState<Boolean>(false);
-    const daemonText = ServerContext.useStoreState((state) => state.server.data?.daemonText);
-    const containerText = ServerContext.useStoreState((state) => state.server.data?.containerText);
-
-    const TERMINAL_PRELUDE = `\u001b[1m\u001b[33m${containerText} \u001b[0m`;
-    const TERMINAL_DAEMON =  `\u001b[1m\u001b[33m${daemonText}\u001b[0m`;
+export default () => {
+    const TERMINAL_PRELUDE = '\u001b[1m\u001b[33mcontainer@pterodactyl~ \u001b[0m';
     const ref = useRef<HTMLDivElement>(null);
     const terminal = useMemo(() => new Terminal({ ...terminalProps }), []);
     const fitAddon = new FitAddon();
@@ -87,31 +74,8 @@ export default ({ fullConsole }: Props) => {
         z-index: 10;
     }`;
 
-    const addLog = (data: string) => {
-        setConsoleLog((prevLog) => [...prevLog, data.startsWith('>') ? data.substring(1) : data]);
-    };
-
-    useEffect(() => {
-        if (!connected || !instance) return;
-
-        instance.addListener(SocketEvent.CONSOLE_OUTPUT, addLog);
-
-        return () => {
-            instance.removeListener(SocketEvent.CONSOLE_OUTPUT, addLog);
-        };
-    }, [connected, instance]);
-
-    const handleConsoleOutput = (line: string, prelude = false) => {
-        terminal.writeln(
-            (prelude ? TERMINAL_PRELUDE : '') +
-            line
-                .replace('container@pterodactyl~ ', TERMINAL_PRELUDE)
-                .replace('[Pterodactyl Daemon]:', TERMINAL_DAEMON)
-                .replace(/(?:\r\n|\r|\n)$/im, '') +
-            '\u001b[0m'
-        );
-    };
-    
+    const handleConsoleOutput = (line: string, prelude = false) =>
+        terminal.writeln((prelude ? TERMINAL_PRELUDE : '') + line.replace(/(?:\r\n|\r|\n)$/im, '') + '\u001b[0m');
 
     const handleTransferStatus = (status: string) => {
         switch (status) {
@@ -229,43 +193,8 @@ export default ({ fullConsole }: Props) => {
         };
     }, [connected, instance]);
 
-    const openWindow = () => {
-        window.open(
-            `/server/${serverId}/console/popup`,
-            'popUpWindow',
-            'height=500,width=800,left=100,top=100,resizable=yes,scrollbars=yes,toolbar=yes,menubar=no,location=no,directories=no, status=yes'
-        );
-    };
-
-    const logData = async () => {
-        setCopied(false);
-
-        try {
-            const data = consoleLog.slice(-500).map((it) => it.replace('\r', '')).join('\n').replace(/[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g, '') || '';
-
-            const response = await fetch('https://api.mclo.gs/1/log', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: `content=${data}`,
-            });
-    
-            const responseData = await response.json();
-            await copy(responseData['url']);
-            if (localStorage.getItem('panelSounds') === 'true'){
-                const copySound = new Audio('/arix/copy.mp3');
-                copySound.volume = 0.2;
-                copySound.play();
-            }
-            setCopied(true);
-        } catch (error) {
-            console.error('Error:', error);
-        }
-    };
-    
     return (
-        <div className={classNames(styles.terminal, fullConsole ? 'fixed top-0 left-0 h-full w-full z-[90]' : 'relative rounded-box', 'backdrop')}>
+        <div className={classNames(styles.terminal, 'relative')}>
             <SpinnerOverlay visible={!connected} size={'large'} />
             <div
                 className={classNames(styles.container, styles.overflows_container, { 'rounded-b': !canSendCommands })}
@@ -274,13 +203,12 @@ export default ({ fullConsole }: Props) => {
                     <div id={styles.terminal} ref={ref} />
                 </div>
             </div>
-            <div className={classNames('relative min-h-8', styles.overflows_container)}>
             {canSendCommands && (
-                <>
+                <div className={classNames('relative', styles.overflows_container)}>
                     <input
                         className={classNames('peer', styles.command_input)}
                         type={'text'}
-                        placeholder={t('type-a-command')}
+                        placeholder={'Type a command...'}
                         aria-label={'Console command input.'}
                         disabled={!instance || !connected}
                         onKeyDown={handleCommandKeyDown}
@@ -295,24 +223,9 @@ export default ({ fullConsole }: Props) => {
                     >
                         <ChevronDoubleRightIcon className={'w-4 h-4'} />
                     </div>
-                </>
-            )}
-            {fullConsole ?
-                <PowerButtons icons className={'absolute flex items-center gap-x-2 right-0 top-0 py-[4px] px-[5px]'}/>
-                :
-                <div className={'absolute right-0 top-0 py-3.5 pr-4 flex items-center gap-x-2'}>
-                    <button onClick={logData} className={'lg:block hidden text-gray-200 hover:text-gray-100 duration-300'}>
-                        {isCopied 
-                            ? <ClipboardCheckIcon className={'w-5 text-success-100'}/>
-                            : <ClipboardIcon className={'w-5'}/>
-                        }
-                    </button>
-                    <button onClick={openWindow} className={'lg:block hidden text-gray-200 hover:text-gray-100 duration-300'}>
-                        <ArrowsExpandIcon className={'w-5'}/>
-                    </button>
+                    <CommandRow />
                 </div>
-            }
-            </div>
+            )}
         </div>
     );
 };

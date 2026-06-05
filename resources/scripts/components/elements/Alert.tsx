@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useStoreState } from 'easy-peasy';
 import { ApplicationStore } from '@/state';
 import { LuPartyPopper, LuMegaphone, LuInfo, LuCircleAlert, LuTriangleAlert, LuCircleCheck, LuCircleX } from "react-icons/lu";
-import parser from 'bbcode-to-react';
 import styled from 'styled-components/macro';
 import tw from 'twin.macro';
 
@@ -87,7 +86,7 @@ const Alert = () => {
                 }
 
                 <div>
-                    {parser.toReact(announcementMessage)}
+                    {announcementMessage}
                 </div>
 
 
