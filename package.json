@@ -16,6 +16,7 @@
         "@tailwindcss/line-clamp": "^0.4.0",
         "@types/bbcode-to-react": "^0.2.4",
         "@types/md5": "^2.3.6",
+        "animejs": "^4.4.1",
         "axios": "^1.13.2",
         "bbcode-to-react": "^0.2.9",
         "boring-avatars": "^1.7.0",
