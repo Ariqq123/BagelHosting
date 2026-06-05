@@ -28,11 +28,13 @@ import {
     GlobeIcon,
     AdjustmentsIcon,
     CogIcon,
+    CodeIcon,
     PuzzleIcon,
 } from '@heroicons/react/outline';
 
 const FileEditContainer = lazy(() => import('@/components/server/files/FileEditContainer'));
 const ScheduleEditContainer = lazy(() => import('@/components/server/schedules/ScheduleEditContainer'));
+const VersionsContainer = lazy(() => import('@/components/server/versions/VersionsContainer'));
 
 const SubdomainsIcon = (props: React.SVGProps<SVGSVGElement>) =>
     React.createElement(
@@ -212,6 +214,13 @@ export default {
                 name: 'startup',
                 icon: AdjustmentsIcon,
                 component: StartupContainer,
+            },
+            {
+                path: '/versions',
+                permission: 'settings.reinstall',
+                name: 'versions',
+                icon: CodeIcon,
+                component: VersionsContainer,
             },
         ],
     },
