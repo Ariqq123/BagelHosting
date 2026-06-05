@@ -39,7 +39,7 @@ class McVersionsCatalogService
         return array_map(
             fn (string $type, string $name) => $this->base(
                 $name,
-                "Installs {$name} from the MCJars API.",
+                '',
                 $this->mcJarsInstallScript($type)
             ),
             array_keys($types),
@@ -86,7 +86,7 @@ class McVersionsCatalogService
     {
         return [
             'name' => $name,
-            'description' => self::MARKER . ' ' . $description,
+            'description' => trim(self::MARKER . ' ' . $description),
             'features' => ['eula'],
             'docker_images' => [
                 'Java 21' => 'ghcr.io/pterodactyl/yolks:java_21',
