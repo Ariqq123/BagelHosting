@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import tw from 'twin.macro';
 import { Actions, useStoreActions } from 'easy-peasy';
-import { CodeIcon } from '@heroicons/react/outline';
+import { CodeIcon, ExclamationIcon } from '@heroicons/react/outline';
 import FlashMessageRender from '@/components/FlashMessageRender';
 import ServerContentBlock from '@/components/elements/ServerContentBlock';
 import TitledGreyBox from '@/components/elements/TitledGreyBox';
@@ -33,6 +33,7 @@ const VersionsContainer = () => {
     const [confirmVisible, setConfirmVisible] = useState(false);
     const [selectedEggId, setSelectedEggId] = useState<number>();
     const [version, setVersion] = useState('latest');
+    const [resetConfirmed, setResetConfirmed] = useState(false);
 
     const load = () => {
         setLoading(true);
@@ -43,6 +44,7 @@ const VersionsContainer = () => {
                 setData(response);
                 setSelectedEggId(response.current.egg_id ?? response.software[0]?.id);
                 setVersion(response.current.version || 'latest');
+                setResetConfirmed(false);
             })
             .catch((error) => {
                 console.error(error);
@@ -105,12 +107,17 @@ const VersionsContainer = () => {
                 This will reinstall the server using {selectedSoftware?.name ?? 'the selected software'} {version.trim()}.
                 Existing files can be replaced by the egg install script.
             </Dialog.Confirm>
-            <TitledGreyBox title={'Minecraft Version Installer'}>
+            <div css={tw`mx-auto w-full max-w-xl`}>
+                <TitledGreyBox title={'Version changer'} css={tw`relative`}>
                 <InputSpinner visible={loading || installing}>
-                    <div css={tw`grid gap-6 md:grid-cols-2`}>
-                        <div>
-                            <label css={tw`block text-xs uppercase text-neutral-300 mb-2`}>Software</label>
+                    <p css={tw`mb-5 text-sm text-neutral-200`}>
+                        Easily switch your server to a different Minecraft version with just one click.
+                    </p>
+                    <div css={tw`space-y-3`}>
+                        <div css={tw`relative`}>
+                            <CodeIcon css={tw`pointer-events-none absolute left-3 top-1/2 z-10 h-5 w-5 -translate-y-1/2 text-primary-300`} />
                             <Select
+                                css={tw`pl-11`}
                                 value={selectedEggId ?? ''}
                                 disabled={!data?.software.length || installing}
                                 onChange={(event) => setSelectedEggId(Number(event.currentTarget.value))}
@@ -121,36 +128,48 @@ const VersionsContainer = () => {
                                     </option>
                                 ))}
                             </Select>
-                            {selectedSoftware?.description && (
-                                <p css={tw`mt-2 text-xs text-neutral-300`}>{selectedSoftware.description}</p>
-                            )}
                         </div>
                         <div>
-                            <label css={tw`block text-xs uppercase text-neutral-300 mb-2`}>Version</label>
                             <Input
                                 value={version}
                                 disabled={installing}
                                 hasError={invalidVersion}
                                 onChange={(event) => setVersion(event.currentTarget.value)}
-                                placeholder={'latest'}
+                                placeholder={'Select a version'}
                             />
-                            <p css={tw`mt-2 text-xs text-neutral-300`}>Use latest or a version like 1.21.4.</p>
+                        </div>
+                        <div css={tw`rounded border border-neutral-600 bg-neutral-700/40 p-4`}>
+                            <div css={tw`mb-2 flex items-center text-sm text-red-300`}>
+                                <ExclamationIcon css={tw`mr-2 h-5 w-5`} />
+                                <span>Danger zone</span>
+                            </div>
+                            <label css={tw`flex cursor-pointer items-start gap-3 text-sm text-neutral-200`}>
+                                <Input
+                                    type={'checkbox'}
+                                    checked={resetConfirmed}
+                                    disabled={installing}
+                                    onChange={(event) => setResetConfirmed(event.currentTarget.checked)}
+                                    css={tw`mt-0.5`}
+                                />
+                                <span>Reset the server, and delete all files (worlds, configs, plugins etc)</span>
+                            </label>
                         </div>
                     </div>
-                    <div css={tw`mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between`}>
-                        <p css={tw`text-sm text-neutral-300`}>
-                            Current: {data?.current.name ?? 'Unknown'} {data?.current.version ?? 'latest'}
+                    <div css={tw`mt-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between`}>
+                        <p css={tw`text-sm text-neutral-200`}>
+                            Powered by <strong css={tw`font-semibold text-neutral-100`}>MC Utils</strong>
                         </p>
-                        <Button.Danger
+                        <Button
                             type={'button'}
-                            disabled={!selectedEggId || invalidVersion || installing}
+                            disabled={!selectedEggId || invalidVersion || !resetConfirmed || installing}
                             onClick={() => setConfirmVisible(true)}
                         >
-                            Install Version
-                        </Button.Danger>
+                            Install
+                        </Button>
                     </div>
                 </InputSpinner>
-            </TitledGreyBox>
+                </TitledGreyBox>
+            </div>
         </ServerContentBlock>
     );
 };
