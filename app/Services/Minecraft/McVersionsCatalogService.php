@@ -2,22 +2,84 @@
 
 namespace Pterodactyl\Services\Minecraft;
 
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Http;
+
 class McVersionsCatalogService
 {
     public const AUTHOR = 'mc-versions-generator@example.com';
     public const MARKER = 'Managed by MC Versions generator.';
     public const NEST_NAME = 'Minecraft Versions';
 
+    private const FALLBACK_TYPES = [
+        'ARCLIGHT' => 'Arclight',
+        'BUNGEECORD' => 'BungeeCord',
+        'CANVAS' => 'Canvas',
+        'FABRIC' => 'Fabric',
+        'FOLIA' => 'Folia',
+        'FORGE' => 'Forge',
+        'LEAVES' => 'Leaves',
+        'MOHIST' => 'Mohist',
+        'NEOFORGE' => 'NeoForge',
+        'PAPER' => 'Paper',
+        'PUFFERFISH' => 'Pufferfish',
+        'PURPUR' => 'Purpur',
+        'QUILT' => 'Quilt',
+        'SPIGOT' => 'Spigot',
+        'SPONGE' => 'Sponge',
+        'VANILLA' => 'Vanilla',
+        'VELOCITY' => 'Velocity',
+        'WATERFALL' => 'Waterfall',
+    ];
+
     public function definitions(): array
     {
-        return [
-            $this->paper(),
-            $this->purpur(),
-            $this->vanilla(),
-            $this->fabric(),
-            $this->forge(),
-            $this->velocity(),
-        ];
+        $types = $this->types();
+
+        return array_map(
+            fn (string $type, string $name) => $this->base(
+                $name,
+                "Installs {$name} from the MCJars API.",
+                $this->mcJarsInstallScript($type)
+            ),
+            array_keys($types),
+            $types,
+        );
+    }
+
+    private function types(): array
+    {
+        return Cache::remember('mc_versions.catalog_types', now()->addDay(), function () {
+            try {
+                $response = Http::timeout(5)->get('https://mcjars.app/api/v1/types');
+
+                if (!$response->successful()) {
+                    return self::FALLBACK_TYPES;
+                }
+
+                $types = $response->json('types') ?? [];
+
+                if (!is_array($types)) {
+                    return self::FALLBACK_TYPES;
+                }
+
+                $mapped = [];
+                foreach ($types as $type => $metadata) {
+                    if (!is_string($type) || !preg_match('/^[A-Z0-9_]+$/', $type)) {
+                        continue;
+                    }
+
+                    $name = is_array($metadata) ? ($metadata['name'] ?? null) : null;
+                    $mapped[$type] = is_string($name) && preg_match('/^[A-Za-z0-9 ._-]{1,64}$/', $name)
+                        ? $name
+                        : self::FALLBACK_TYPES[$type] ?? ucfirst(strtolower($type));
+                }
+
+                return $mapped ?: self::FALLBACK_TYPES;
+            } catch (\Throwable) {
+                return self::FALLBACK_TYPES;
+            }
+        });
     }
 
     private function base(string $name, string $description, string $installScript, array $extraVariables = []): array
@@ -68,37 +130,9 @@ class McVersionsCatalogService
         ];
     }
 
-    private function paper(): array
+    public static function typeForName(string $name): string
     {
-        return $this->base('Paper', 'Installs Paper from the MCJars API.', $this->mcJarsInstallScript('PAPER'));
-    }
-
-    private function purpur(): array
-    {
-        return $this->base('Purpur', 'Installs Purpur from the MCJars API.', $this->mcJarsInstallScript('PURPUR'));
-    }
-
-    private function vanilla(): array
-    {
-        return $this->base('Vanilla', 'Installs Vanilla from the MCJars API.', $this->mcJarsInstallScript('VANILLA'));
-    }
-
-    private function fabric(): array
-    {
-        return $this->base('Fabric', 'Installs Fabric from the MCJars API.', $this->mcJarsInstallScript('FABRIC'));
-    }
-
-    private function forge(): array
-    {
-        return $this->base('Forge', 'Installs Forge from the MCJars API.', $this->mcJarsInstallScript('FORGE'));
-    }
-
-    private function velocity(): array
-    {
-        $definition = $this->base('Velocity', 'Installs Velocity from the MCJars API.', $this->mcJarsInstallScript('VELOCITY'));
-        $definition['startup'] = 'java -Xms128M -XX:MaxRAMPercentage=95.0 -jar {{SERVER_JARFILE}}';
-
-        return $definition;
+        return strtoupper(preg_replace('/[^A-Za-z0-9]/', '', $name));
     }
 
     private function mcJarsInstallScript(string $type): string

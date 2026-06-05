@@ -48,6 +48,7 @@ class VersionsController extends ClientApiController
                     'description' => trim(str_replace(McVersionsCatalogService::MARKER, '', $egg->description ?? '')),
                     'icon' => $metadata['icon'] ?? null,
                     'color' => $metadata['color'] ?? null,
+                    'versions' => $this->mcJarsVersionsForType($type),
                 ];
             })->values(),
             'current' => [
@@ -91,9 +92,9 @@ class VersionsController extends ClientApiController
                 'startup' => $egg->startup,
                 'image' => $this->defaultDockerImage($egg),
             ])->save();
-
-            $this->reinstallServerService->handle($server->fresh());
         });
+
+        $this->reinstallServerService->handle($server->fresh());
 
         Activity::event('server:versions.change')
             ->property('egg', $egg->name)
@@ -135,16 +136,43 @@ class VersionsController extends ClientApiController
         });
     }
 
+    private function mcJarsVersionsForType(string $type): array
+    {
+        return Cache::remember("mc_versions.mcjars_versions.v2.{$type}", now()->addHour(), function () use ($type) {
+            try {
+                $response = Http::timeout(8)->get("https://mcjars.app/api/v1/builds/{$type}");
+
+                if (!$response->successful()) {
+                    return [];
+                }
+
+                $versions = [];
+                foreach (($response->json('versions') ?? []) as $version => $metadata) {
+                    if (!is_string($version) || !preg_match('/^[A-Za-z0-9._+-]{1,32}$/', $version)) {
+                        continue;
+                    }
+
+                    $versions[] = [
+                        'id' => $version,
+                        'type' => strtoupper((string) ($metadata['type'] ?? 'RELEASE')),
+                        'created' => strtotime((string) ($metadata['created'] ?? '')) ?: 0,
+                    ];
+                }
+
+                usort($versions, fn ($a, $b) => $b['created'] <=> $a['created'] ?: version_compare($b['id'], $a['id']));
+
+                return array_map(
+                    fn ($version) => ['id' => $version['id'], 'type' => $version['type']],
+                    array_slice($versions, 0, 250)
+                );
+            } catch (\Throwable) {
+                return [];
+            }
+        });
+    }
+
     private function mcJarsTypeForEgg(Egg $egg): string
     {
-        return match (strtolower($egg->name)) {
-            'paper' => 'PAPER',
-            'purpur' => 'PURPUR',
-            'vanilla' => 'VANILLA',
-            'fabric' => 'FABRIC',
-            'forge' => 'FORGE',
-            'velocity' => 'VELOCITY',
-            default => strtoupper($egg->name),
-        };
+        return McVersionsCatalogService::typeForName($egg->name);
     }
 }

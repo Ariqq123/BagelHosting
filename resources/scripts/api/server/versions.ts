@@ -1,5 +1,10 @@
 import http from '@/api/http';
 
+export interface ServerVersionOption {
+    id: string;
+    type: string;
+}
+
 export interface ServerVersionSoftware {
     id: number;
     name: string;
@@ -7,6 +12,7 @@ export interface ServerVersionSoftware {
     description: string;
     icon: string | null;
     color: string | null;
+    versions: ServerVersionOption[];
 }
 
 export interface ServerVersionsResponse {
