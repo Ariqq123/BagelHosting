@@ -31,7 +31,7 @@ const fallbackLabel = (software?: ServerVersionSoftware) => (software?.type || s
 const SoftwareIcon = ({ software, large }: { software?: ServerVersionSoftware; large?: boolean }) => {
     const size = large ? tw`h-12 w-12` : tw`h-9 w-9`;
     const imageSize = large ? tw`h-10 w-10` : tw`h-7 w-7`;
-    const shell = tw`inline-flex flex-shrink-0 items-center justify-center overflow-hidden rounded border border-neutral-600 bg-neutral-800 shadow-sm`;
+    const shell = tw`inline-flex flex-shrink-0 items-center justify-center overflow-hidden rounded border border-primary-400 bg-primary-500/10 shadow-sm`;
 
     if (software?.icon) {
         return (
