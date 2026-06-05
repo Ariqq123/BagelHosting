@@ -25,6 +25,7 @@ return [
     'schedules' => 'Schedules',
     'users' => 'Users',
     'startup' => 'Startup',
+    'versions' => 'Versions',
     'admin-view' => 'Admin view',
 
     'general' => 'General',
