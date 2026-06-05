@@ -9,14 +9,13 @@ import FlashMessageRender from '@/components/FlashMessageRender';
 import getServerSubusers from '@/api/server/users/getServerSubusers';
 import { httpErrorToHuman } from '@/api/http';
 import Can from '@/components/elements/Can';
-import TableList from '@/components/elements/TableList';
 import ServerContentBlock from '@/components/elements/ServerContentBlock';
-import { UserGroupIcon } from '@heroicons/react/outline';
 import tw from 'twin.macro';
-import { useTranslation } from 'react-i18next';
+
+import BeforeContent from '@blueprint/components/Server/Users/BeforeContent';
+import AfterContent from '@blueprint/components/Server/Users/AfterContent';
 
 export default () => {
-    const { t } = useTranslation('arix/server/users');
     const [loading, setLoading] = useState(true);
 
     const uuid = ServerContext.useStoreState((state) => state.server.data!.uuid);
@@ -52,35 +51,20 @@ export default () => {
     }
 
     return (
-        <ServerContentBlock title={t('title')} icon={UserGroupIcon}>
+        <ServerContentBlock title={'Users'}>
             <FlashMessageRender byKey={'users'} css={tw`mb-4`} />
-            <div className={'bg-gray-700 rounded-box backdrop'}>
-                <div className={'flex lg:flex-row flex-col gap-2 items-start justify-between px-6 pt-5 pb-1'}>
-                    <p className={'text-medium text-gray-300'}>{t('manage-subusers')}</p>
-                    <Can action={'user.create'}>
-                        <AddSubuserButton />
-                    </Can>
+            <BeforeContent />
+            {!subusers.length ? (
+                <p css={tw`text-center text-sm text-neutral-300`}>It looks like you don&apos;t have any subusers.</p>
+            ) : (
+                subusers.map((subuser) => <UserRow key={subuser.uuid} subuser={subuser} />)
+            )}
+            <Can action={'user.create'}>
+                <div css={tw`flex justify-end mt-6`}>
+                    <AddSubuserButton />
                 </div>
-                <TableList>
-                    <tr>
-                        <th>{t('name')}</th>
-                        <th>{t('email')}</th>
-                        <th>{t('2FA-enabled')}</th>
-                        <th>{t('creation-date')}</th>
-                        <th></th>
-                    </tr>
-                    {!subusers.length ? (
-                        <tr>
-                            <td colSpan={5} css={tw`text-center text-sm`}>
-                                {t('no-users')}
-                            </td>
-                        </tr>
-                    ) : (
-                        subusers.map((subuser) => <UserRow key={subuser.uuid} subuser={subuser} />)
-                    )}
-                </TableList>
-                
-            </div>
+            </Can>
+            <AfterContent />
         </ServerContentBlock>
     );
 };

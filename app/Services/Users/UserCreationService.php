@@ -29,7 +29,7 @@ class UserCreationService
      * @throws \Exception
      * @throws \Pterodactyl\Exceptions\Model\DataValidationException
      */
-    public function handle(array $data): User
+    public function handle(array $data, bool $passwordSetupPending = false): User
     {
         if (array_key_exists('password', $data) && !empty($data['password'])) {
             $data['password'] = $this->hasher->make($data['password']);
@@ -44,6 +44,7 @@ class UserCreationService
         /** @var User $user */
         $user = $this->repository->create(array_merge($data, [
             'uuid' => Uuid::uuid4()->toString(),
+            'password_setup_pending' => $passwordSetupPending,
         ]), true, true);
 
         if (isset($generateResetToken)) {

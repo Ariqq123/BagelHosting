@@ -128,6 +128,7 @@ class User extends Model implements
         'name_first',
         'name_last',
         'password',
+        'password_setup_pending',
         'language',
         'use_totp',
         'totp_secret',
@@ -143,6 +144,7 @@ class User extends Model implements
         'root_admin' => 'boolean',
         'use_totp' => 'boolean',
         'gravatar' => 'boolean',
+        'password_setup_pending' => 'boolean',
         'totp_authenticated_at' => 'datetime',
     ];
 
@@ -160,6 +162,7 @@ class User extends Model implements
         'language' => 'en',
         'use_totp' => false,
         'totp_secret' => null,
+        'password_setup_pending' => false,
     ];
 
     /**
@@ -173,6 +176,7 @@ class User extends Model implements
         'name_first' => 'required|string|between:1,191',
         'name_last' => 'required|string|between:1,191',
         'password' => 'sometimes|nullable|string',
+        'password_setup_pending' => 'boolean',
         'root_admin' => 'boolean',
         'language' => 'string',
         'use_totp' => 'boolean',

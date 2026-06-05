@@ -2,7 +2,6 @@ import React from 'react';
 import { ServerContext } from '@/state/server';
 import { LuServer } from "react-icons/lu";
 import styled from 'styled-components/macro';
-import parser from 'bbcode-to-react';
 import tw from 'twin.macro';
 
 const MyAlert = styled.div`
@@ -26,7 +25,7 @@ const NodeAlert = () => {
             <MyAlert className={'backdrop'}>
                 <LuServer />
                 <div>
-                    {parser.toReact(nodeAlert)}
+                    {nodeAlert}
                 </div>
             </MyAlert>
             }

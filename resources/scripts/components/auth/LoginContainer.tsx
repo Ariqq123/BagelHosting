@@ -18,17 +18,27 @@ interface Values {
     password: string;
 }
 
-const LoginContainer = ({ history }: RouteComponentProps) => {
+interface LoginLocationState {
+    flashMessage?: string;
+}
+
+const LoginContainer = ({ history, location }: RouteComponentProps<{}, any, LoginLocationState>) => {
     const { t } = useTranslation('arix/auth');
     const ref = useRef<Reaptcha>(null);
     const [token, setToken] = useState('');
     const [eyeOpen, setEyeOpen] = useState(false);
 
-    const { clearFlashes, clearAndAddHttpError } = useFlash();
+    const { clearFlashes, clearAndAddHttpError, addFlash } = useFlash();
     const { enabled: recaptchaEnabled, siteKey } = useStoreState((state) => state.settings.data!.recaptcha);
+    const registrationEnabled = useStoreState((state) => state.settings.data!.arix.registration?.enabled ?? false);
 
     useEffect(() => {
         clearFlashes();
+
+        if (location.state?.flashMessage) {
+            addFlash({ type: 'success', title: 'Success', message: location.state.flashMessage });
+            history.replace('/auth/login');
+        }
     }, []);
 
     const onSubmit = (values: Values, { setSubmitting }: FormikHelpers<Values>) => {
@@ -104,6 +114,14 @@ const LoginContainer = ({ history }: RouteComponentProps) => {
                             {t('login.login')}
                         </Button>
                     </div>
+                    {registrationEnabled && (
+                        <div css={tw`mt-4 text-sm text-neutral-300 text-center`}>
+                            <span>Don&apos;t have an account? </span>
+                            <Link to={'/auth/register'} css={tw`underline hover:text-neutral-200`}>
+                                {t('register.register')}
+                            </Link>
+                        </div>
+                    )}
                     <div className={'z-50 relative'}>
                         {recaptchaEnabled && (
                             <Reaptcha

@@ -22,7 +22,7 @@ class ResetPasswordController extends Controller
     /**
      * The URL to redirect users to after password reset.
      */
-    public string $redirectTo = '/';
+    public string $redirectTo = '/auth/login';
 
     protected bool $hasTwoFactor = false;
 
@@ -78,6 +78,7 @@ class ResetPasswordController extends Controller
     {
         $user = $this->userRepository->update($user->id, [
             'password' => $this->hasher->make($password),
+            'password_setup_pending' => false,
             $user->getRememberTokenName() => Str::random(60),
         ]);
 

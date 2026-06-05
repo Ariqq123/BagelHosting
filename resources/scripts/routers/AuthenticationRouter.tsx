@@ -6,8 +6,10 @@ import LoginContainer from '@/components/auth/LoginContainer';
 import ForgotPasswordContainer from '@/components/auth/ForgotPasswordContainer';
 import ResetPasswordContainer from '@/components/auth/ResetPasswordContainer';
 import LoginCheckpointContainer from '@/components/auth/LoginCheckpointContainer';
+import RegisterContainer from '@/components/auth/RegisterContainer';
+import RegisterConfirmationContainer from '@/components/auth/RegisterConfirmationContainer';
 import { SupportIcon } from '@heroicons/react/outline';
-import { FaDiscord } from "react-icons/fa";
+import { FaDiscord } from 'react-icons/fa';
 import { NotFound } from '@/components/elements/ScreenBlock';
 import { useHistory, useLocation } from 'react-router';
 import { useTranslation } from 'react-i18next';
@@ -21,6 +23,8 @@ const Switches = () => {
         <Switch location={location}>
             <Route path={`${path}/login`} component={LoginContainer} exact />
             <Route path={`${path}/login/checkpoint`} component={LoginCheckpointContainer} />
+            <Route path={`${path}/register`} component={RegisterContainer} exact />
+            <Route path={`${path}/register/confirmation`} component={RegisterConfirmationContainer} exact />
             <Route path={`${path}/password`} component={ForgotPasswordContainer} exact />
             <Route path={`${path}/password/reset/:token`} component={ResetPasswordContainer} />
             <Route path={`${path}/checkpoint`} />
@@ -43,8 +47,14 @@ const TopBar = () => {
     const logoPosition = useStoreState((state: ApplicationStore) => state.settings.data!.arix.logoPosition);
     const discord = useStoreState((state: ApplicationStore) => state.settings.data!.arix.discord);
     const support = useStoreState((state: ApplicationStore) => state.settings.data!.arix.support);
+    const hasDiscord = !!discord && discord !== 'none';
 
     useEffect(() => {
+        if (!hasDiscord) {
+            setGuildData(null);
+            return;
+        }
+
         const fetchData = async () => {
           try {
             const response = await fetch(`https://discord.com/api/guilds/${discord}/widget.json`);
@@ -61,7 +71,7 @@ const TopBar = () => {
         };
     
         fetchData();
-      }, []);
+      }, [discord, hasDiscord]);
 
     return(
         <div className={'flex items-center justify-between p-5'}>
@@ -72,7 +82,7 @@ const TopBar = () => {
             </div>}
             {socialPosition == 1 &&
                 <div className={'flex gap-x-6'}>
-                    {discord && <>{guildData !== null ? <a className={'flex gap-x-1 items-center duration-300 hover:text-gray-100'} href={guildData.instant_invite}><FaDiscord /> Discord</a> : <a href={''}><FaDiscord />Discord</a>}</>}
+                    {hasDiscord && <>{guildData !== null ? <a className={'flex gap-x-1 items-center duration-300 hover:text-gray-100'} href={guildData.instant_invite}><FaDiscord /> Discord</a> : <a href={''}><FaDiscord />Discord</a>}</>}
                     {support && <a className={'flex gap-x-1 items-center duration-300 hover:text-gray-100'} href={support}><SupportIcon className={'w-5'} />{t('support')}</a>}
                 </div>
             }
