@@ -70,103 +70,81 @@ class McVersionsCatalogService
 
     private function paper(): array
     {
-        return $this->base('Paper', 'Installs Paper from the PaperMC API.', <<<'SH'
-#!/bin/ash
-apk add --no-cache curl jq
-cd /mnt/server
-PROJECT=paper
-USER_AGENT="Pterodactyl MC Versions Generator"
-if [ -z "${MINECRAFT_VERSION}" ] || [ "${MINECRAFT_VERSION}" = "latest" ]; then
-  MINECRAFT_VERSION=$(curl -sSL -A "${USER_AGENT}" https://api.papermc.io/v2/projects/${PROJECT} | jq -r '.versions[-1]')
-fi
-BUILD=$(curl -sSL -A "${USER_AGENT}" https://api.papermc.io/v2/projects/${PROJECT}/versions/${MINECRAFT_VERSION} | jq -r '.builds[-1]')
-JAR=${PROJECT}-${MINECRAFT_VERSION}-${BUILD}.jar
-curl -sSL -A "${USER_AGENT}" -o "${SERVER_JARFILE}" "https://api.papermc.io/v2/projects/${PROJECT}/versions/${MINECRAFT_VERSION}/builds/${BUILD}/downloads/${JAR}"
-SH);
+        return $this->base('Paper', 'Installs Paper from the MCJars API.', $this->mcJarsInstallScript('PAPER'));
     }
 
     private function purpur(): array
     {
-        return $this->base('Purpur', 'Installs Purpur from the Purpur API.', <<<'SH'
-#!/bin/ash
-apk add --no-cache curl jq
-cd /mnt/server
-if [ -z "${MINECRAFT_VERSION}" ] || [ "${MINECRAFT_VERSION}" = "latest" ]; then
-  MINECRAFT_VERSION=$(curl -sSL https://api.purpurmc.org/v2/purpur | jq -r '.versions[-1]')
-fi
-BUILD=$(curl -sSL https://api.purpurmc.org/v2/purpur/${MINECRAFT_VERSION} | jq -r '.builds.latest')
-curl -sSL -o "${SERVER_JARFILE}" "https://api.purpurmc.org/v2/purpur/${MINECRAFT_VERSION}/${BUILD}/download"
-SH);
+        return $this->base('Purpur', 'Installs Purpur from the MCJars API.', $this->mcJarsInstallScript('PURPUR'));
     }
 
     private function vanilla(): array
     {
-        return $this->base('Vanilla', 'Installs Vanilla from Mojang manifests.', <<<'SH'
-#!/bin/ash
-apk add --no-cache curl jq
-cd /mnt/server
-MANIFEST=$(curl -sSL https://launchermeta.mojang.com/mc/game/version_manifest.json)
-if [ -z "${MINECRAFT_VERSION}" ] || [ "${MINECRAFT_VERSION}" = "latest" ]; then
-  MINECRAFT_VERSION=$(echo "${MANIFEST}" | jq -r '.latest.release')
-fi
-VERSION_URL=$(echo "${MANIFEST}" | jq -r --arg VERSION "${MINECRAFT_VERSION}" '.versions[] | select(.id == $VERSION) | .url')
-DOWNLOAD_URL=$(curl -sSL "${VERSION_URL}" | jq -r '.downloads.server.url')
-curl -sSL -o "${SERVER_JARFILE}" "${DOWNLOAD_URL}"
-SH);
+        return $this->base('Vanilla', 'Installs Vanilla from the MCJars API.', $this->mcJarsInstallScript('VANILLA'));
     }
 
     private function fabric(): array
     {
-        return $this->base('Fabric', 'Installs Fabric loader from Fabric metadata.', <<<'SH'
-#!/bin/ash
-apk add --no-cache curl jq
-cd /mnt/server
-if [ -z "${MINECRAFT_VERSION}" ] || [ "${MINECRAFT_VERSION}" = "latest" ]; then
-  MINECRAFT_VERSION=$(curl -sSL https://meta.fabricmc.net/v2/versions/game | jq -r '[.[] | select(.stable == true)][0].version')
-fi
-LOADER_VERSION=$(curl -sSL https://meta.fabricmc.net/v2/versions/loader | jq -r '.[0].version')
-INSTALLER_VERSION=$(curl -sSL https://meta.fabricmc.net/v2/versions/installer | jq -r '.[0].version')
-curl -sSL -o "${SERVER_JARFILE}" "https://meta.fabricmc.net/v2/versions/loader/${MINECRAFT_VERSION}/${LOADER_VERSION}/${INSTALLER_VERSION}/server/jar"
-SH);
+        return $this->base('Fabric', 'Installs Fabric from the MCJars API.', $this->mcJarsInstallScript('FABRIC'));
     }
 
     private function forge(): array
     {
-        return $this->base('Forge', 'Installs Forge using Forge promotions metadata.', <<<'SH'
-#!/bin/ash
-apk add --no-cache curl jq bash
-cd /mnt/server
-if [ -z "${MINECRAFT_VERSION}" ] || [ "${MINECRAFT_VERSION}" = "latest" ]; then
-  MINECRAFT_VERSION=$(curl -sSL https://files.minecraftforge.net/net/minecraftforge/forge/promotions_slim.json | jq -r '.promos | keys[] | select(endswith("-latest")) | split("-")[0]' | sort -V | tail -1)
-fi
-FORGE_VERSION=$(curl -sSL https://files.minecraftforge.net/net/minecraftforge/forge/promotions_slim.json | jq -r --arg MC "${MINECRAFT_VERSION}-latest" '.promos[$MC]')
-DOWNLOAD="https://maven.minecraftforge.net/net/minecraftforge/forge/${MINECRAFT_VERSION}-${FORGE_VERSION}/forge-${MINECRAFT_VERSION}-${FORGE_VERSION}-installer.jar"
-curl -sSL -o installer.jar "${DOWNLOAD}"
-java -jar installer.jar --installServer
-if [ -f forge-${MINECRAFT_VERSION}-${FORGE_VERSION}.jar ]; then
-  mv forge-${MINECRAFT_VERSION}-${FORGE_VERSION}.jar "${SERVER_JARFILE}"
-fi
-rm -f installer.jar
-SH);
+        return $this->base('Forge', 'Installs Forge from the MCJars API.', $this->mcJarsInstallScript('FORGE'));
     }
 
     private function velocity(): array
     {
-        $definition = $this->base('Velocity', 'Installs Velocity from the PaperMC API.', <<<'SH'
-#!/bin/ash
-apk add --no-cache curl jq
-cd /mnt/server
-PROJECT=velocity
-USER_AGENT="Pterodactyl MC Versions Generator"
-if [ -z "${MINECRAFT_VERSION}" ] || [ "${MINECRAFT_VERSION}" = "latest" ]; then
-  MINECRAFT_VERSION=$(curl -sSL -A "${USER_AGENT}" https://api.papermc.io/v2/projects/${PROJECT} | jq -r '.versions[-1]')
-fi
-BUILD=$(curl -sSL -A "${USER_AGENT}" https://api.papermc.io/v2/projects/${PROJECT}/versions/${MINECRAFT_VERSION} | jq -r '.builds[-1]')
-JAR=${PROJECT}-${MINECRAFT_VERSION}-${BUILD}.jar
-curl -sSL -A "${USER_AGENT}" -o "${SERVER_JARFILE}" "https://api.papermc.io/v2/projects/${PROJECT}/versions/${MINECRAFT_VERSION}/builds/${BUILD}/downloads/${JAR}"
-SH);
+        $definition = $this->base('Velocity', 'Installs Velocity from the MCJars API.', $this->mcJarsInstallScript('VELOCITY'));
         $definition['startup'] = 'java -Xms128M -XX:MaxRAMPercentage=95.0 -jar {{SERVER_JARFILE}}';
 
         return $definition;
+    }
+
+    private function mcJarsInstallScript(string $type): string
+    {
+        return str_replace('{{TYPE}}', $type, <<<'SH'
+#!/bin/ash
+apk add --no-cache curl jq unzip
+cd /mnt/server
+TYPE="{{TYPE}}"
+API="https://mcjars.app/api/v1/builds/${TYPE}"
+
+if [ -n "${MINECRAFT_VERSION}" ] && [ "${MINECRAFT_VERSION}" != "latest" ]; then
+  API="${API}/${MINECRAFT_VERSION}"
+fi
+
+BUILD=$(curl -fsSL "${API}" | jq -c '
+  if has("builds") then
+    .builds[0]
+  else
+    ([.versions | to_entries[] | select(.value.supported != false) | .value.latest] | last) // ([.versions | to_entries[] | .value.latest] | last)
+  end
+')
+
+if [ -z "${BUILD}" ] || [ "${BUILD}" = "null" ]; then
+  echo "No MCJars build found for ${TYPE} ${MINECRAFT_VERSION:-latest}"
+  exit 1
+fi
+
+JAR_URL=$(echo "${BUILD}" | jq -r '.jarUrl // empty')
+ZIP_URL=$(echo "${BUILD}" | jq -r '.zipUrl // empty')
+
+if [ -n "${JAR_URL}" ]; then
+  curl -fsSL -o "${SERVER_JARFILE}" "${JAR_URL}"
+elif [ -n "${ZIP_URL}" ]; then
+  curl -fsSL -o mcjars-server.zip "${ZIP_URL}"
+  rm -rf libraries
+  unzip -o mcjars-server.zip
+  rm -f mcjars-server.zip
+
+  if [ -f server.jar ] && [ "${SERVER_JARFILE}" != "server.jar" ]; then
+    mv server.jar "${SERVER_JARFILE}"
+  fi
+else
+  echo "MCJars build did not include a jar or zip download URL."
+  exit 1
+fi
+SH);
     }
 }
