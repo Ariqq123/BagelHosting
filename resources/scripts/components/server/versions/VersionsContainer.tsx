@@ -18,10 +18,37 @@ import { httpErrorToHuman } from '@/api/http';
 import {
     getServerVersions,
     installServerVersion,
+    ServerVersionSoftware,
     ServerVersionsResponse,
 } from '@/api/server/versions';
 
 const FLASH_KEY = 'server:versions';
+
+const iconForSoftware = (software?: ServerVersionSoftware) => {
+    const key = software?.name.toLowerCase() ?? '';
+
+    if (key.includes('paper')) return { label: 'P', name: 'Paper', css: tw`bg-green-500 text-green-900` };
+    if (key.includes('purpur')) return { label: 'P', name: 'Purpur', css: tw`bg-purple-500 text-purple-900` };
+    if (key.includes('vanilla')) return { label: 'V', name: 'Vanilla', css: tw`bg-yellow-400 text-yellow-900` };
+    if (key.includes('fabric')) return { label: 'F', name: 'Fabric', css: tw`bg-yellow-500 text-yellow-900` };
+    if (key.includes('forge')) return { label: 'F', name: 'Forge', css: tw`bg-red-400 text-red-900` };
+    if (key.includes('velocity')) return { label: 'V', name: 'Velocity', css: tw`bg-cyan-400 text-cyan-900` };
+
+    return { label: 'J', name: 'Server jar', css: tw`bg-neutral-300 text-neutral-900` };
+};
+
+const SoftwareIcon = ({ software }: { software?: ServerVersionSoftware }) => {
+    const icon = iconForSoftware(software);
+
+    return (
+        <span
+            title={icon.name}
+            css={[tw`inline-flex h-6 w-6 flex-shrink-0 items-center justify-center rounded text-xs font-bold`, icon.css]}
+        >
+            {icon.label}
+        </span>
+    );
+};
 
 const VersionsContainer = () => {
     const uuid = ServerContext.useStoreState((state) => state.server.data!.uuid);
@@ -109,65 +136,67 @@ const VersionsContainer = () => {
             </Dialog.Confirm>
             <div css={tw`mx-auto w-full max-w-xl`}>
                 <TitledGreyBox title={'Version changer'} css={tw`relative`}>
-                <InputSpinner visible={loading || installing}>
-                    <p css={tw`mb-5 text-sm text-neutral-200`}>
-                        Easily switch your server to a different Minecraft version with just one click.
-                    </p>
-                    <div css={tw`space-y-3`}>
-                        <div css={tw`relative`}>
-                            <CodeIcon css={tw`pointer-events-none absolute left-3 top-1/2 z-10 h-5 w-5 -translate-y-1/2 text-primary-300`} />
-                            <Select
-                                css={tw`pl-11`}
-                                value={selectedEggId ?? ''}
-                                disabled={!data?.software.length || installing}
-                                onChange={(event) => setSelectedEggId(Number(event.currentTarget.value))}
-                            >
-                                {data?.software.map((software) => (
-                                    <option key={software.id} value={software.id}>
-                                        {software.name}
-                                    </option>
-                                ))}
-                            </Select>
-                        </div>
-                        <div>
-                            <Input
-                                value={version}
-                                disabled={installing}
-                                hasError={invalidVersion}
-                                onChange={(event) => setVersion(event.currentTarget.value)}
-                                placeholder={'Select a version'}
-                            />
-                        </div>
-                        <div css={tw`rounded border border-neutral-600 bg-neutral-700/40 p-4`}>
-                            <div css={tw`mb-2 flex items-center text-sm text-red-300`}>
-                                <ExclamationIcon css={tw`mr-2 h-5 w-5`} />
-                                <span>Danger zone</span>
-                            </div>
-                            <label css={tw`flex cursor-pointer items-start gap-3 text-sm text-neutral-200`}>
-                                <Input
-                                    type={'checkbox'}
-                                    checked={resetConfirmed}
-                                    disabled={installing}
-                                    onChange={(event) => setResetConfirmed(event.currentTarget.checked)}
-                                    css={tw`mt-0.5`}
-                                />
-                                <span>Reset the server, and delete all files (worlds, configs, plugins etc)</span>
-                            </label>
-                        </div>
-                    </div>
-                    <div css={tw`mt-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between`}>
-                        <p css={tw`text-sm text-neutral-200`}>
-                            Powered by <strong css={tw`font-semibold text-neutral-100`}>MC Utils</strong>
+                    <InputSpinner visible={loading || installing}>
+                        <p css={tw`mb-5 text-sm text-neutral-200`}>
+                            Easily switch your server to a different Minecraft version with just one click.
                         </p>
-                        <Button
-                            type={'button'}
-                            disabled={!selectedEggId || invalidVersion || !resetConfirmed || installing}
-                            onClick={() => setConfirmVisible(true)}
-                        >
-                            Install
-                        </Button>
-                    </div>
-                </InputSpinner>
+                        <div css={tw`space-y-3`}>
+                            <div css={tw`relative`}>
+                                <span css={tw`pointer-events-none absolute left-3 top-1/2 z-10 -translate-y-1/2`}>
+                                    <SoftwareIcon software={selectedSoftware} />
+                                </span>
+                                <Select
+                                    css={tw`pl-12`}
+                                    value={selectedEggId ?? ''}
+                                    disabled={!data?.software.length || installing}
+                                    onChange={(event) => setSelectedEggId(Number(event.currentTarget.value))}
+                                >
+                                    {data?.software.map((software) => (
+                                        <option key={software.id} value={software.id}>
+                                            {iconForSoftware(software).label} - {software.name}
+                                        </option>
+                                    ))}
+                                </Select>
+                            </div>
+                            <div>
+                                <Input
+                                    value={version}
+                                    disabled={installing}
+                                    hasError={invalidVersion}
+                                    onChange={(event) => setVersion(event.currentTarget.value)}
+                                    placeholder={'Select a version'}
+                                />
+                            </div>
+                            <div css={tw`rounded border border-neutral-600 bg-neutral-700/40 p-4`}>
+                                <div css={tw`mb-2 flex items-center text-sm text-red-300`}>
+                                    <ExclamationIcon css={tw`mr-2 h-5 w-5`} />
+                                    <span>Danger zone</span>
+                                </div>
+                                <label css={tw`flex cursor-pointer items-start gap-3 text-sm text-neutral-200`}>
+                                    <Input
+                                        type={'checkbox'}
+                                        checked={resetConfirmed}
+                                        disabled={installing}
+                                        onChange={(event) => setResetConfirmed(event.currentTarget.checked)}
+                                        css={tw`mt-0.5`}
+                                    />
+                                    <span>Reset the server, and delete all files (worlds, configs, plugins etc)</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div css={tw`mt-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between`}>
+                            <p css={tw`text-sm text-neutral-200`}>
+                                Powered by <strong css={tw`font-semibold text-neutral-100`}>MC Utils</strong>
+                            </p>
+                            <Button
+                                type={'button'}
+                                disabled={!selectedEggId || invalidVersion || !resetConfirmed || installing}
+                                onClick={() => setConfirmVisible(true)}
+                            >
+                                Install
+                            </Button>
+                        </div>
+                    </InputSpinner>
                 </TitledGreyBox>
             </div>
         </ServerContentBlock>
