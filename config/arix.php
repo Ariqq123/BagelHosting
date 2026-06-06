@@ -116,4 +116,5 @@ return array (
   'lightmode_gray700' => '#e7e7ef',
   'lightmode_gray800' => '#f0f1f5',
   'lightmode_gray900' => '#ffffff',
+  'tos_content' => NULL,
 );

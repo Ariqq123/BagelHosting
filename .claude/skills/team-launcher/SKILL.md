@@ -15,3 +15,14 @@ Activate when the user types any of:
 - `/team research "<query>"`
 
 Do not activate for any other `/team` usage or general conversation.
+
+## Command Routing
+
+On activation, inspect the first argument after `/team`:
+
+- `debug` → call interactive debug handler
+- `review` → call interactive review handler
+- `research` → call research handler with remaining arguments as query
+- anything else → print short help and exit
+
+If no argument is provided, print help.
