@@ -1,15 +1,7 @@
 import React, { memo, useRef, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-    faBoxOpen,
-    faCopy,
     faEllipsisH,
-    faFileArchive,
-    faFileCode,
-    faFileDownload,
-    faLevelUpAlt,
-    faPencilAlt,
-    faTrashAlt,
     IconDefinition,
 } from '@fortawesome/free-solid-svg-icons';
 import RenameFileModal from '@/components/server/files/RenameFileModal';
@@ -32,31 +24,32 @@ import decompressFiles from '@/api/server/files/decompressFiles';
 import isEqual from 'react-fast-compare';
 import ChmodFileModal from '@/components/server/files/ChmodFileModal';
 import { Dialog } from '@/components/elements/dialog';
-
-import DropdownItems from '@blueprint/components/Server/Files/Browse/DropdownItems';
+import { useTranslation } from 'react-i18next';
+import { LuTextCursor, LuMove, LuKey, LuFileArchive, LuFolderOpenDot, LuTrash2, LuCopy, LuDownload } from "react-icons/lu";
 
 type ModalType = 'rename' | 'move' | 'chmod';
 
 const StyledRow = styled.div<{ $danger?: boolean }>`
-    ${tw`p-2 flex items-center rounded`};
+    ${tw`p-2 flex items-center rounded cursor-pointer`};
     ${(props) =>
-        props.$danger ? tw`hover:bg-red-100 hover:text-red-700` : tw`hover:bg-neutral-100 hover:text-neutral-700`};
+        props.$danger ? tw`hover:bg-danger-100 hover:text-danger-50` : tw`hover:bg-neutral-500 hover:text-neutral-100`};
 `;
 
 interface RowProps extends React.HTMLAttributes<HTMLDivElement> {
-    icon: IconDefinition;
+    icon: React.ComponentType;
     title: string;
     $danger?: boolean;
 }
 
-const Row = ({ icon, title, ...props }: RowProps) => (
+const Row = ({ icon: Icon, title, ...props }: RowProps) => (
     <StyledRow {...props}>
-        <FontAwesomeIcon icon={icon} css={tw`text-xs`} fixedWidth />
+        <Icon />
         <span css={tw`ml-2`}>{title}</span>
     </StyledRow>
 );
 
 const FileDropdownMenu = ({ file }: { file: FileObject }) => {
+    const { t } = useTranslation('arix/server/files');
     const onClickRef = useRef<DropdownMenu>(null);
     const [showSpinner, setShowSpinner] = useState(false);
     const [modal, setModal] = useState<ModalType | null>(null);
@@ -69,7 +62,7 @@ const FileDropdownMenu = ({ file }: { file: FileObject }) => {
 
     useEventListener(`pterodactyl:files:ctx:${file.key}`, (e: CustomEvent) => {
         if (onClickRef.current) {
-            onClickRef.current.triggerMenu(e.detail);
+            onClickRef.current.triggerMenu(e.detail.clientX, e.detail.clientY);
         }
     });
 
@@ -138,8 +131,8 @@ const FileDropdownMenu = ({ file }: { file: FileObject }) => {
                 confirm={'Delete'}
                 onConfirmed={doDeletion}
             >
-                You will not be able to recover the contents of&nbsp;
-                <span className={'font-semibold text-gray-50'}>{file.name}</span> once deleted.
+                {t('you-cant-recover')}&nbsp;
+                <span className={'font-semibold text-gray-50'}>{file.name}</span> {t('once-deleted')}
             </Dialog.Confirm>
             <DropdownMenu
                 ref={onClickRef}
@@ -169,29 +162,28 @@ const FileDropdownMenu = ({ file }: { file: FileObject }) => {
                 )}
             >
                 <Can action={'file.update'}>
-                    <Row onClick={() => setModal('rename')} icon={faPencilAlt} title={'Rename'} />
-                    <Row onClick={() => setModal('move')} icon={faLevelUpAlt} title={'Move'} />
-                    <Row onClick={() => setModal('chmod')} icon={faFileCode} title={'Permissions'} />
+                    <Row onClick={() => setModal('rename')} icon={LuTextCursor} title={t('rename')} />
+                    <Row onClick={() => setModal('move')} icon={LuMove} title={t('move')} />
+                    <Row onClick={() => setModal('chmod')} icon={LuKey} title={t('permissions')} />
                 </Can>
                 {file.isFile && (
                     <Can action={'file.create'}>
-                        <Row onClick={doCopy} icon={faCopy} title={'Copy'} />
+                        <Row onClick={doCopy} icon={LuCopy} title={t('copy')} />
                     </Can>
                 )}
                 {file.isArchiveType() ? (
                     <Can action={'file.create'}>
-                        <Row onClick={doUnarchive} icon={faBoxOpen} title={'Unarchive'} />
+                        <Row onClick={doUnarchive} icon={LuFolderOpenDot} title={t('unarchive')} />
                     </Can>
                 ) : (
                     <Can action={'file.archive'}>
-                        <Row onClick={doArchive} icon={faFileArchive} title={'Archive'} />
+                        <Row onClick={doArchive} icon={LuFileArchive} title={t('archive')} />
                     </Can>
                 )}
-                {file.isFile && <Row onClick={doDownload} icon={faFileDownload} title={'Download'} />}
+                {file.isFile && <Row onClick={doDownload} icon={LuDownload} title={t('download')} />}
                 <Can action={'file.delete'}>
-                    <Row onClick={() => setShowConfirmation(true)} icon={faTrashAlt} title={'Delete'} $danger />
+                    <Row onClick={() => setShowConfirmation(true)} icon={LuTrash2} title={t('delete')} $danger />
                 </Can>
-                <DropdownItems />
             </DropdownMenu>
         </>
     );
