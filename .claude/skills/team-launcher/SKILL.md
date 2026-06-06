@@ -56,3 +56,15 @@ When subcommand is `debug`:
 2. Once all answers collected, proceed to spawn debugging swarm (see Agent Orchestration section).
 3. User may type "cancel" at any prompt to abort cleanly.
 
+## Review Handler (Interactive)
+
+When subcommand is `review`:
+
+1. Use `AskUserQuestion` to collect:
+   - What to review (branch, PR number, file path, or feature area)
+   - Focus areas (security, performance, maintainability, tests, or all)
+   - Any specific concerns
+
+2. Once context collected, proceed to spawn review team.
+3. User may cancel at any prompt.
+
