@@ -2,16 +2,20 @@ import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/elements/button/index';
 import Can from '@/components/elements/Can';
 import { ServerContext } from '@/state/server';
+import { MinusCircleIcon, PlayIcon, RefreshIcon, StopIcon } from '@heroicons/react/outline';
 import { PowerAction } from '@/components/server/console/ServerConsoleContainer';
 import { Dialog } from '@/components/elements/dialog';
+import { useTranslation } from 'react-i18next';
 
 import AdditionalPowerButtons from '@blueprint/components/Server/Terminal/AdditionalPowerButtons';
 
 interface PowerButtonProps {
+    icons?: boolean;
     className?: string;
 }
 
-export default ({ className }: PowerButtonProps) => {
+export default ({ className, icons }: PowerButtonProps) => {
+    const { t } = useTranslation('arix/utilities');
     const [open, setOpen] = useState(false);
     const status = ServerContext.useStoreState((state) => state.status.value);
     const instance = ServerContext.useStoreState((state) => state.socket.instance);
@@ -44,34 +48,35 @@ export default ({ className }: PowerButtonProps) => {
                 open={open}
                 hideCloseIcon
                 onClose={() => setOpen(false)}
-                title={'Forcibly Stop Process'}
-                confirm={'Continue'}
+                title={t('forcibly-stop-process')}
+                confirm={t('continue')}
                 onConfirmed={onButtonClick.bind(this, 'kill-confirmed')}
             >
-                Forcibly stopping a server can lead to data corruption.
+                {t('forcibly-stopping-alert')}
             </Dialog.Confirm>
             <AdditionalPowerButtons />
             <Can action={'control.start'}>
-                <Button
-                    className={'flex-1'}
+                <Button.Success
+                    className={'flex items-center gap-x-1'}
                     disabled={status !== 'offline'}
                     onClick={onButtonClick.bind(this, 'start')}
                 >
-                    Start
-                </Button>
+                    <PlayIcon className={'w-5'} /> {!icons && t('start')}
+                </Button.Success>
             </Can>
             <Can action={'control.restart'}>
-                <Button.Text className={'flex-1'} disabled={!status} onClick={onButtonClick.bind(this, 'restart')}>
-                    Restart
+                <Button.Text className={'flex items-center gap-x-1'} disabled={!status} onClick={onButtonClick.bind(this, 'restart')}>
+                    <RefreshIcon className={'w-5'} /> {!icons && t('restart')}
                 </Button.Text>
             </Can>
             <Can action={'control.stop'}>
                 <Button.Danger
-                    className={'flex-1'}
+                    className={'flex items-center gap-x-1'}
                     disabled={status === 'offline'}
                     onClick={onButtonClick.bind(this, killable ? 'kill' : 'stop')}
                 >
-                    {killable ? 'Kill' : 'Stop'}
+                    {killable ? <MinusCircleIcon className={'w-5'} /> : <StopIcon className={'w-5'} />}
+                    {!icons && <>{killable ? t('kill') : t('stop')}</>}
                 </Button.Danger>
             </Can>
         </div>
