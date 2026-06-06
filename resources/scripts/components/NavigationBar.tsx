@@ -157,6 +157,7 @@ export default ({ children }: Props) => {
     const searchComponent = useStoreState((state: ApplicationStore) => state.settings.data!.arix.searchComponent);
     const discord = useStoreState((state: ApplicationStore) => state.settings.data!.arix.discord);
     const support = useStoreState((state: ApplicationStore) => state.settings.data!.arix.support);
+    const tosContent = useStoreState((state: ApplicationStore) => state.settings.data!.arix.tos_content);
     const hasDiscord = !!discord && discord !== 'none';
 
     useEffect(() => {
@@ -212,6 +213,7 @@ export default ({ children }: Props) => {
                 <RightNavigation>
                     {hasDiscord && <>{guildData !== null ? <a href={guildData.instant_invite}><FaDiscord /> Discord</a> : <a href={''}><FaDiscord />Discord</a>}</>}
                     {support && <a href={support}><SupportIcon className={'w-5'} />{t`supportcenter`}</a>}
+                    {tosContent && <a href="/tos">Terms of Service</a>}
                     <AdditionalItems />
                     {layout == 3 && <ClientDropdown />}
                 </RightNavigation>
@@ -243,6 +245,7 @@ export default ({ children }: Props) => {
                         </NavLink>
                         {hasDiscord && <>{guildData !== null ? <a href={guildData.instant_invite}><FaDiscord /> Discord</a> : <a href={''}><FaDiscord />Discord</a>}</>}
                         {support !== 'none' && <a href={support}><SupportIcon className={'w-5'} />{t`supportcenter`}</a>}
+                        {tosContent && <a href="/tos">Terms of Service</a>}
                     </div>
                     {children}
                 </MobileLinks>
