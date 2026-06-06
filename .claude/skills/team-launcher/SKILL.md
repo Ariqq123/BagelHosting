@@ -68,6 +68,15 @@ When subcommand is `review`:
 2. Once context collected, proceed to spawn review team.
 3. User may cancel at any prompt.
 
+## Research Handler
+
+When subcommand is `research`:
+
+1. Take the entire remaining argument string as the research query.
+2. If no query is provided, print the help message and exit.
+3. Immediately delegate to the existing `deep-research` skill with the query.
+4. After research completes, write the full report and post chat summary (see Output Handling).
+
 ## Error Handling
 
 - Unknown subcommand or missing argument → print help message and exit.
