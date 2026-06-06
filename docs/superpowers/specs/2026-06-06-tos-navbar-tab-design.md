@@ -32,7 +32,7 @@ Add a "Terms of Service" tab to the main Arix navbar that links to an in-panel p
 - New route: `GET /tos` (registered in `routes/web.php` or an Arix routes file)
 - View: `resources/views/arix/tos.blade.php` extending the Arix layout
 - The view receives `$tos_content` from config and renders it with `{!! $tos_content !!}`
-- Route can be public (no auth middleware) so logged-out users can view TOS
+- Route requires authentication (inherits `auth.session` + 2FA middleware); TOS is only visible to logged-in users (design decision: keep TOS behind login for layout compatibility)
 
 ### Navbar Integration
 - File: `resources/scripts/components/NavigationBar.tsx`
