@@ -186,7 +186,7 @@ export default ({ children }: Props) => {
     return (
         <>
         <BeforeNavigation />
-        <div className={`w-full px-4 overflow-x-auto !overflow-visible z-20 relative ${layout == 3 ? 'bg-gray-700 backdrop !border-0' : ''}`}>
+        <div className={`w-full px-4 overflow-x-auto !overflow-visible z-30 sticky top-0 lg:relative ${layout == 3 ? 'bg-gray-700 backdrop !border-0' : 'bg-gray-800/95 backdrop'}`}>
             <div className={`mx-auto w-full flex items-center justify-between max-w-[1200px] py-2`}>
                 <div className="flex gap-x-10 items-center">
                     {layout == 3 &&
