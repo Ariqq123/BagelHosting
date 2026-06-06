@@ -12,12 +12,10 @@ import { useLocation } from 'react-router';
 import Spinner from '@/components/elements/Spinner';
 import SideBar from '@/components/SideBar';
 import routes from '@/routers/routes';
-import blueprintRoutes from '@blueprint/extends/routers/routes';
 
 export default () => {
     const location = useLocation();
     const layout = useStoreState((state: ApplicationStore) => state.settings.data!.arix.layout);
-    const rootAdmin = useStoreState((state) => state.user.data!.rootAdmin);
 
     return (
         <>
@@ -38,13 +36,6 @@ export default () => {
                                     <Component />
                                 </Route>
                             ))}
-                            {blueprintRoutes.account
-                                .filter((route) => (route.adminOnly ? rootAdmin : true))
-                                .map(({ path, component: Component }) => (
-                                    <Route key={path} path={`/account/${path}`.replace('//', '/')} exact>
-                                        <Component />
-                                    </Route>
-                                ))}
                             <Route path={'*'}>
                                 <NotFound />
                             </Route>
