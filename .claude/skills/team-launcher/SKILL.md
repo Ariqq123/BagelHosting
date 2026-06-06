@@ -43,3 +43,16 @@ Example:
   /team research "Claude API caching best practices 2026"
 ```
 
+## Debug Handler (Interactive)
+
+When subcommand is `debug`:
+
+1. Use `AskUserQuestion` to collect:
+   - Bug description / symptom
+   - Affected files or routes
+   - Reproduction steps
+   - Any recent changes or error logs
+
+2. Once all answers collected, proceed to spawn debugging swarm (see Agent Orchestration section).
+3. User may type "cancel" at any prompt to abort cleanly.
+
