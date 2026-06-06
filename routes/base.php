@@ -21,8 +21,7 @@ Route::get('/tos', function () {
     }
 
     return view('arix.tos', ['tos_content' => $tosContent]);
-})->name('arix.tos')
-    ->withoutMiddleware(['auth', RequireTwoFactorAuthentication::class]);
+})->name('arix.tos');
 
 Route::get('/{react}', [Base\IndexController::class, 'index'])
     ->where('react', '^(?!(\/)?(api|auth|admin|daemon)).+');
