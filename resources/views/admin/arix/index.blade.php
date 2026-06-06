@@ -46,6 +46,11 @@
             <input type="text" id="arix:billing" name="arix:billing" value="{{ old('arix:billing', $billing) }}" />
             <small>Leave empty to remove the support link from your panel</small>
         </div>
+        <div class="input-field hr">
+            <label for="arix:tos_content">Terms of Service content</label>
+            <textarea id="arix:tos_content" name="arix:tos_content" rows="10">{{ old('arix:tos_content', $tos_content ?? '') }}</textarea>
+            <small>Leave empty to hide the TOS link from the navbar. HTML is allowed.</small>
+        </div>
         <div class="floating-button">
             {!! csrf_field() !!}
             <button type="submit" class="button button-primary">Save changes</button>
