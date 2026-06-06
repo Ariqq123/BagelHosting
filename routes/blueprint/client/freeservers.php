@@ -1,1 +1,0 @@
-../../../.blueprint/extensions/freeservers/routers/client.php
