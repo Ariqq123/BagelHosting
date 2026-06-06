@@ -13,5 +13,16 @@ Route::get('/locales/locale.json', Base\LocaleController::class)
     ->withoutMiddleware(['auth', RequireTwoFactorAuthentication::class])
     ->where('namespace', '.*');
 
+Route::get('/tos', function () {
+    $tosContent = config('arix.tos_content');
+
+    if (empty(trim($tosContent ?? ''))) {
+        abort(404);
+    }
+
+    return view('arix.tos', ['tos_content' => $tosContent]);
+})->name('arix.tos')
+    ->withoutMiddleware(['auth', RequireTwoFactorAuthentication::class]);
+
 Route::get('/{react}', [Base\IndexController::class, 'index'])
     ->where('react', '^(?!(\/)?(api|auth|admin|daemon)).+');
