@@ -95,3 +95,17 @@ After context is gathered (or query received), the launcher spawns agents using 
 
 The launcher decides whether to use simple parallel agent calls or a full `Workflow` based on task complexity.
 
+## Output Handling
+
+After every team run:
+
+1. Generate a slug: `YYYY-MM-DD-<short-description>` (e.g., `2026-06-06-auth-bug-debug`).
+2. Write the full report to `docs/superpowers/reports/<slug>.md`.
+3. Post a concise summary in chat containing:
+   - One-paragraph overview
+   - Key findings (bullets)
+   - Path to the full report
+   - Recommended next actions or blocking issues
+
+If the reports directory does not exist, create it automatically.
+
