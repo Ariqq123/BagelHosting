@@ -34,7 +34,8 @@ export interface SiteSettings {
         support: string,
         status: string,
         billing: string,
-      
+        tos_content?: string,
+
         /* LAYOUT */
         layout: number,
         searchComponent: number,
