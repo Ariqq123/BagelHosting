@@ -98,6 +98,10 @@ class SubdomainDomainController extends Controller
 
     public function edit(SubdomainDomain $domain): View
     {
+        $domain->load([
+            'subdomains' => fn ($query) => $query->with(['server.user', 'user'])->orderBy('fqdn'),
+        ]);
+
         return view('admin.subdomains.form', [
             'domain' => $domain,
             'mode' => 'edit',

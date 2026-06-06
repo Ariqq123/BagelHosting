@@ -96,4 +96,80 @@
         </div>
     @endif
 </div>
+@if($mode === 'edit')
+<div class="row">
+    <div class="col-xs-12">
+        <div id="used-subdomains" class="box box-info">
+            <div class="box-header with-border">
+                <h3 class="box-title">Used Subdomains</h3>
+                <div class="box-tools">
+                    <span class="label label-primary">{{ $domain->subdomains->count() }} records</span>
+                </div>
+            </div>
+            <div class="box-body table-responsive no-padding">
+                <table class="table table-hover">
+                    <tbody>
+                        <tr>
+                            <th>Subdomain</th>
+                            <th>Type</th>
+                            <th>Target</th>
+                            <th>Server</th>
+                            <th>Created By</th>
+                            <th class="text-center">Status</th>
+                        </tr>
+                        @forelse($domain->subdomains as $subdomain)
+                            <tr>
+                                <td>
+                                    <code>{{ $subdomain->fqdn }}</code>
+                                    @if($subdomain->srv_port)
+                                        <p class="text-muted small no-margin">SRV port {{ $subdomain->srv_port }}</p>
+                                    @endif
+                                </td>
+                                <td>{{ $subdomain->type }}</td>
+                                <td><code>{{ $subdomain->content }}</code></td>
+                                <td>
+                                    @if($subdomain->server)
+                                        <a href="{{ route('admin.servers.view', $subdomain->server->id) }}">
+                                            {{ $subdomain->server->name }}
+                                        </a>
+                                        <p class="text-muted small no-margin">{{ $subdomain->server->uuidShort }}</p>
+                                    @else
+                                        <span class="text-muted">Unknown server</span>
+                                    @endif
+                                </td>
+                                <td>
+                                    @if($subdomain->user)
+                                        <a href="{{ route('admin.users.view', $subdomain->user->id) }}">
+                                            {{ $subdomain->user->username }}
+                                        </a>
+                                    @elseif($subdomain->server && $subdomain->server->user)
+                                        <a href="{{ route('admin.users.view', $subdomain->server->user->id) }}">
+                                            {{ $subdomain->server->user->username }}
+                                        </a>
+                                        <p class="text-muted small no-margin">server owner</p>
+                                    @else
+                                        <span class="text-muted">Unknown user</span>
+                                    @endif
+                                </td>
+                                <td class="text-center">
+                                    <span class="label label-{{ $subdomain->status === 'active' ? 'success' : 'danger' }}">
+                                        {{ $subdomain->status }}
+                                    </span>
+                                    @if($subdomain->error_message)
+                                        <p class="text-red small no-margin">{{ $subdomain->error_message }}</p>
+                                    @endif
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="6" class="text-center">No servers are using this domain yet.</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+@endif
 @endsection

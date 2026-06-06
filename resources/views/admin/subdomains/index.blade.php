@@ -111,7 +111,11 @@
                                 <td>{{ implode(', ', $domain->allowed_record_types ?? []) }}</td>
                                 <td class="text-center"><i class="fa fa-{{ $domain->proxied ? 'check text-green' : 'times text-red' }}"></i></td>
                                 <td class="text-center"><i class="fa fa-{{ $domain->enabled ? 'check text-green' : 'times text-red' }}"></i></td>
-                                <td class="text-center">{{ $domain->subdomains_count }}</td>
+                                <td class="text-center">
+                                    <a href="{{ route('admin.subdomains.edit', $domain->id) }}#used-subdomains">
+                                        {{ $domain->subdomains_count }}
+                                    </a>
+                                </td>
                             </tr>
                         @empty
                             <tr>
