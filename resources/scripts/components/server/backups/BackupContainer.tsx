@@ -6,15 +6,16 @@ import CreateBackupButton from '@/components/server/backups/CreateBackupButton';
 import FlashMessageRender from '@/components/FlashMessageRender';
 import BackupRow from '@/components/server/backups/BackupRow';
 import tw from 'twin.macro';
+import TableList from '@/components/elements/TableList';
 import getServerBackups, { Context as ServerBackupContext } from '@/api/swr/getServerBackups';
 import { ServerContext } from '@/state/server';
 import ServerContentBlock from '@/components/elements/ServerContentBlock';
 import Pagination from '@/components/elements/Pagination';
-
-import BeforeContent from '@blueprint/components/Server/Backups/BeforeContent';
-import AfterContent from '@blueprint/components/Server/Backups/AfterContent';
+import { ArchiveIcon } from '@heroicons/react/outline';
+import { useTranslation } from 'react-i18next';
 
 const BackupContainer = () => {
+    const { t } = useTranslation('arix/server/backups');
     const { page, setPage } = useContext(ServerBackupContext);
     const { clearFlashes, clearAndAddHttpError } = useFlash();
     const { data: backups, error, isValidating } = getServerBackups();
@@ -36,46 +37,62 @@ const BackupContainer = () => {
     }
 
     return (
-        <ServerContentBlock title={'Backups'}>
+        <ServerContentBlock title={t('backups')} icon={ArchiveIcon}>
             <FlashMessageRender byKey={'backups'} css={tw`mb-4`} />
-            <BeforeContent />
-            <Pagination data={backups} onPageSelect={setPage}>
-                {({ items }) =>
-                    !items.length ? (
-                        // Don't show any error messages if the server has no backups and the user cannot
-                        // create additional ones for the server.
-                        !backupLimit ? null : (
-                            <p css={tw`text-center text-sm text-neutral-300`}>
-                                {page > 1
-                                    ? "Looks like we've run out of backups to show you, try going back a page."
-                                    : 'It looks like there are no backups currently stored for this server.'}
-                            </p>
-                        )
-                    ) : (
-                        items.map((backup, index) => (
-                            <BackupRow key={backup.uuid} backup={backup} css={index > 0 ? tw`mt-2` : undefined} />
-                        ))
-                    )
-                }
-            </Pagination>
-            {backupLimit === 0 && (
-                <p css={tw`text-center text-sm text-neutral-300`}>
-                    Backups cannot be created for this server because the backup limit is set to 0.
-                </p>
-            )}
-            <Can action={'backup.create'}>
-                <div css={tw`mt-6 sm:flex items-center justify-end`}>
-                    {backupLimit > 0 && backups.backupCount > 0 && (
-                        <p css={tw`text-sm text-neutral-300 mb-4 sm:mr-6 sm:mb-0`}>
-                            {backups.backupCount} of {backupLimit} backups have been created for this server.
+            <div className={'bg-gray-700 rounded-box backdrop'}>
+                <div className={'flex lg:flex-row flex-col gap-2 items-start justify-between px-6 pt-5 pb-1'}>
+                    <div>
+                        <p className={'text-medium text-gray-300'}>{t('manage-backups')}</p>
+                        {backupLimit > 0 && backups.backupCount > 0 && (
+                        <p css={tw`text-sm text-neutral-300 mt-1`}>
+                            {t('have-been-allocated', { current: backups.backupCount, max: backupLimit })}
                         </p>
                     )}
-                    {backupLimit > 0 && backupLimit > backups.backupCount && (
-                        <CreateBackupButton css={tw`w-full sm:w-auto`} />
-                    )}
+                    </div>
+                    <Can action={'backup.create'}>
+                        {backupLimit > 0 && backupLimit > backups.backupCount && (
+                            <CreateBackupButton css={tw`w-full sm:w-auto`} />
+                        )}
+                    </Can>
                 </div>
-            </Can>
-            <AfterContent />
+                <TableList>
+                    <tr>
+                        <th>{t('name')}</th>
+                        <th>{t('size')}</th>
+                        <th>{t('creation-date')}</th>
+                        <th>{t('checksum')}</th>
+                        <th></th>
+                    </tr>
+                    {backupLimit === 0 && (
+                        <tr>
+                            <td colSpan={5} css={tw`text-center text-sm`}>
+                                {t('limit-is-0')}
+                            </td>
+                        </tr>
+                    )}
+                    <Pagination data={backups} onPageSelect={setPage}>
+                        {({ items }) =>
+                            !items.length ? (
+                                // Don't show any error messages if the server has no backups and the user cannot
+                                // create additional ones for the server.
+                                !backupLimit ? null : (
+                                    <tr>
+                                        <td colSpan={5} css={tw`text-center text-sm`}>
+                                            {page > 1
+                                                ? t('try-going-back')
+                                                : t('no-backups')}
+                                        </td>
+                                    </tr>
+                                )
+                            ) : (
+                                items.map((backup, index) => (
+                                    <BackupRow key={backup.uuid} backup={backup} css={index > 0 ? tw`mt-2` : undefined} />
+                                ))
+                            )
+                        }
+                    </Pagination>
+                </TableList>
+            </div>
         </ServerContentBlock>
     );
 };
