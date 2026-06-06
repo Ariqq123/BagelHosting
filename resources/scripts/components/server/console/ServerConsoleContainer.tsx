@@ -3,23 +3,21 @@ import { ApplicationStore } from '@/state';
 import { useStoreState } from 'easy-peasy';
 import { ServerContext } from '@/state/server';
 import ServerContentBlock from '@/components/elements/ServerContentBlock';
-import Console from '@/components/server/console/Console';
-import SideGraphs from '@/components/server/console/SideGraphs';
 import StatGraphs from '@/components/server/console/StatGraphs';
-import ServerDetailsBlock from '@/components/server/console/ServerDetailsBlock';
+import SideGraphs from '@/components/server/console/SideGraphs';
 import isEqual from 'react-fast-compare';
+import Spinner from '@/components/elements/Spinner';
 import Features from '@feature/Features';
+import Console from '@/components/server/console/Console';
+import ServerDetailsBlock from '@/components/server/console/ServerDetailsBlock';
 import { Alert } from '@/components/elements/alert';
 import { TerminalIcon } from '@heroicons/react/outline';
 import { useTranslation } from 'react-i18next';
 
-import BeforeContent from '@blueprint/components/Server/Terminal/BeforeContent';
-import AfterContent from '@blueprint/components/Server/Terminal/AfterContent';
-
 export type PowerAction = 'start' | 'stop' | 'restart' | 'kill';
 
 const ServerConsoleContainer = () => {
-    const { t } = useTranslation('arix/server/console');
+    const { t } = useTranslation('arix/server/console')
     const sideGraphs = useStoreState((state: ApplicationStore) => state.settings.data!.arix.sideGraphs);
     const statsCards = useStoreState((state: ApplicationStore) => state.settings.data!.arix.statsCards);
     const graphs = useStoreState((state: ApplicationStore) => state.settings.data!.arix.graphs);
@@ -39,45 +37,43 @@ const ServerConsoleContainer = () => {
                         : t('being-transferred')}
                 </Alert>
             )}
-            <BeforeContent />
-            {statsCards == 2 && (
-                <div className={'mb-4'}>
-                    <ServerDetailsBlock />
-                </div>
-            )}
-            {graphs == 2 && (
-                <div className={'grid lg:grid-cols-3 gap-4 mb-4'}>
-                    <StatGraphs />
-                </div>
-            )}
+            {statsCards == 2 &&
+            <div className={'mb-4'}>
+                <ServerDetailsBlock />
+            </div>}
+            {graphs == 2 &&
+            <div className={'grid lg:grid-cols-3 gap-4 mb-4'}>
+                <StatGraphs />
+            </div>}
+
             <div className={'lg:grid grid-cols-3 flex flex-col gap-4'}>
-                {sideGraphs == 3 && (
+                {sideGraphs == 3 &&
                     <div className={'flex flex-col gap-4'}>
-                        <SideGraphs />
+                        <SideGraphs /> 
                     </div>
-                )}
+                } 
                 <div className={sideGraphs == 1 ? 'lg:col-span-3' : 'lg:col-span-2'}>
-                    <React.Suspense fallback={null}>
+                    <Spinner.Suspense>
                         <Console />
-                    </React.Suspense>
+                    </Spinner.Suspense>
                 </div>
-                {sideGraphs == 2 && (
+                {sideGraphs == 2 &&
                     <div className={'flex flex-col gap-4'}>
-                        <SideGraphs />
+                        <SideGraphs /> 
                     </div>
-                )}
+                } 
             </div>
-            {statsCards == 3 && (
-                <div className={'mt-4'}>
-                    <ServerDetailsBlock />
-                </div>
-            )}
-            {graphs == 3 && (
-                <div className={'grid lg:grid-cols-3 gap-4 mt-4'}>
-                    <StatGraphs />
-                </div>
-            )}
-            <AfterContent />
+
+            {statsCards == 3 &&
+            <div className={'mt-4'}>
+                <ServerDetailsBlock />
+            </div>}
+
+            {graphs == 3 &&
+            <div className={'grid lg:grid-cols-3 gap-4 mt-4'}>
+                <StatGraphs />
+            </div>}
+            
             <Features enabled={eggFeatures} />
         </ServerContentBlock>
     );

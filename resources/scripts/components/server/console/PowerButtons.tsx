@@ -2,12 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/elements/button/index';
 import Can from '@/components/elements/Can';
 import { ServerContext } from '@/state/server';
-import { MinusCircleIcon, PlayIcon, RefreshIcon, StopIcon } from '@heroicons/react/outline';
+import { StopIcon, RefreshIcon, PlayIcon, MinusCircleIcon } from '@heroicons/react/outline';
 import { PowerAction } from '@/components/server/console/ServerConsoleContainer';
 import { Dialog } from '@/components/elements/dialog';
 import { useTranslation } from 'react-i18next';
-
-import AdditionalPowerButtons from '@blueprint/components/Server/Terminal/AdditionalPowerButtons';
 
 interface PowerButtonProps {
     icons?: boolean;
@@ -54,19 +52,18 @@ export default ({ className, icons }: PowerButtonProps) => {
             >
                 {t('forcibly-stopping-alert')}
             </Dialog.Confirm>
-            <AdditionalPowerButtons />
             <Can action={'control.start'}>
                 <Button.Success
                     className={'flex items-center gap-x-1'}
                     disabled={status !== 'offline'}
                     onClick={onButtonClick.bind(this, 'start')}
                 >
-                    <PlayIcon className={'w-5'} /> {!icons && t('start')}
+                    <PlayIcon className={'w-5'}/> {!icons && t('start')}
                 </Button.Success>
             </Can>
             <Can action={'control.restart'}>
                 <Button.Text className={'flex items-center gap-x-1'} disabled={!status} onClick={onButtonClick.bind(this, 'restart')}>
-                    <RefreshIcon className={'w-5'} /> {!icons && t('restart')}
+                    <RefreshIcon className={'w-5'}/> {!icons && t('restart')}
                 </Button.Text>
             </Can>
             <Can action={'control.stop'}>
@@ -75,7 +72,8 @@ export default ({ className, icons }: PowerButtonProps) => {
                     disabled={status === 'offline'}
                     onClick={onButtonClick.bind(this, killable ? 'kill' : 'stop')}
                 >
-                    {killable ? <MinusCircleIcon className={'w-5'} /> : <StopIcon className={'w-5'} />}
+
+                    {killable ? <MinusCircleIcon className={'w-5'}/> : <StopIcon className={'w-5'}/>}
                     {!icons && <>{killable ? t('kill') : t('stop')}</>}
                 </Button.Danger>
             </Can>

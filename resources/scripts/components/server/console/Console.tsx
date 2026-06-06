@@ -16,11 +16,9 @@ import { SocketEvent, SocketRequest } from '@/components/server/events';
 import PowerButtons from '@/components/server/console/PowerButtons';
 import classNames from 'classnames';
 import copy from 'copy-to-clipboard';
-import { ArrowsExpandIcon, ClipboardCheckIcon, ClipboardIcon } from '@heroicons/react/outline';
+import { ArrowsExpandIcon, ClipboardIcon, ClipboardCheckIcon } from '@heroicons/react/outline'
 import { ChevronDoubleRightIcon } from '@heroicons/react/solid';
 import { useTranslation } from 'react-i18next';
-
-import CommandRow from '@blueprint/components/Server/Terminal/CommandRow';
 
 import 'xterm/css/xterm.css';
 import styles from './style.module.css';
@@ -68,8 +66,8 @@ export default ({ fullConsole }: Props) => {
     const daemonText = ServerContext.useStoreState((state) => state.server.data?.daemonText);
     const containerText = ServerContext.useStoreState((state) => state.server.data?.containerText);
 
-    const TERMINAL_PRELUDE = `\u001b[1m\u001b[33m${containerText || 'container@pterodactyl~'} \u001b[0m`;
-    const TERMINAL_DAEMON = `\u001b[1m\u001b[33m${daemonText || '[Pterodactyl Daemon]:'}\u001b[0m`;
+    const TERMINAL_PRELUDE = `\u001b[1m\u001b[33m${containerText} \u001b[0m`;
+    const TERMINAL_DAEMON =  `\u001b[1m\u001b[33m${daemonText}\u001b[0m`;
     const ref = useRef<HTMLDivElement>(null);
     const terminal = useMemo(() => new Terminal({ ...terminalProps }), []);
     const fitAddon = new FitAddon();
@@ -106,13 +104,14 @@ export default ({ fullConsole }: Props) => {
     const handleConsoleOutput = (line: string, prelude = false) => {
         terminal.writeln(
             (prelude ? TERMINAL_PRELUDE : '') +
-                line
-                    .replace('container@pterodactyl~ ', TERMINAL_PRELUDE)
-                    .replace('[Pterodactyl Daemon]:', TERMINAL_DAEMON)
-                    .replace(/(?:\r\n|\r|\n)$/im, '') +
-                '\u001b[0m'
+            line
+                .replace('container@pterodactyl~ ', TERMINAL_PRELUDE)
+                .replace('[Pterodactyl Daemon]:', TERMINAL_DAEMON)
+                .replace(/(?:\r\n|\r|\n)$/im, '') +
+            '\u001b[0m'
         );
     };
+    
 
     const handleTransferStatus = (status: string) => {
         switch (status) {
@@ -242,15 +241,7 @@ export default ({ fullConsole }: Props) => {
         setCopied(false);
 
         try {
-            const data =
-                consoleLog
-                    .slice(-500)
-                    .map((it) => it.replace('\r', ''))
-                    .join('\n')
-                    .replace(
-                        /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g,
-                        ''
-                    ) || '';
+            const data = consoleLog.slice(-500).map((it) => it.replace('\r', '')).join('\n').replace(/[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g, '') || '';
 
             const response = await fetch('https://api.mclo.gs/1/log', {
                 method: 'POST',
@@ -259,10 +250,10 @@ export default ({ fullConsole }: Props) => {
                 },
                 body: `content=${data}`,
             });
-
+    
             const responseData = await response.json();
             await copy(responseData['url']);
-            if (localStorage.getItem('panelSounds') === 'true') {
+            if (localStorage.getItem('panelSounds') === 'true'){
                 const copySound = new Audio('/arix/copy.mp3');
                 copySound.volume = 0.2;
                 copySound.play();
@@ -272,15 +263,9 @@ export default ({ fullConsole }: Props) => {
             console.error('Error:', error);
         }
     };
-
+    
     return (
-        <div
-            className={classNames(
-                styles.terminal,
-                fullConsole ? 'fixed top-0 left-0 h-full w-full z-[90]' : 'relative rounded-box',
-                'backdrop'
-            )}
-        >
+        <div className={classNames(styles.terminal, fullConsole ? 'fixed top-0 left-0 h-full w-full z-[90]' : 'relative rounded-box', 'backdrop')}>
             <SpinnerOverlay visible={!connected} size={'large'} />
             <div
                 className={classNames(styles.container, styles.overflows_container, { 'rounded-b': !canSendCommands })}
@@ -290,8 +275,8 @@ export default ({ fullConsole }: Props) => {
                 </div>
             </div>
             <div className={classNames('relative min-h-8', styles.overflows_container)}>
-                {canSendCommands && (
-                    <>
+            {canSendCommands && (
+                <>
                     <input
                         className={classNames('peer', styles.command_input)}
                         type={'text'}
@@ -310,32 +295,24 @@ export default ({ fullConsole }: Props) => {
                     >
                         <ChevronDoubleRightIcon className={'w-4 h-4'} />
                     </div>
-                    </>
-                )}
-                {fullConsole ? (
-                    <PowerButtons icons className={'absolute flex items-center gap-x-2 right-0 top-0 py-[4px] px-[5px]'} />
-                ) : (
-                    <div className={'absolute right-0 top-0 py-3.5 pr-4 flex items-center gap-x-2'}>
-                        <button
-                            onClick={logData}
-                            className={'lg:block hidden text-gray-200 hover:text-gray-100 duration-300'}
-                        >
-                            {isCopied ? (
-                                <ClipboardCheckIcon className={'w-5 text-success-100'} />
-                            ) : (
-                                <ClipboardIcon className={'w-5'} />
-                            )}
-                        </button>
-                        <button
-                            onClick={openWindow}
-                            className={'lg:block hidden text-gray-200 hover:text-gray-100 duration-300'}
-                        >
-                            <ArrowsExpandIcon className={'w-5'} />
-                        </button>
-                    </div>
-                )}
-                <CommandRow />
+                </>
+            )}
+            {fullConsole ?
+                <PowerButtons icons className={'absolute flex items-center gap-x-2 right-0 top-0 py-[4px] px-[5px]'}/>
+                :
+                <div className={'absolute right-0 top-0 py-3.5 pr-4 flex items-center gap-x-2'}>
+                    <button onClick={logData} className={'lg:block hidden text-gray-200 hover:text-gray-100 duration-300'}>
+                        {isCopied 
+                            ? <ClipboardCheckIcon className={'w-5 text-success-100'}/>
+                            : <ClipboardIcon className={'w-5'}/>
+                        }
+                    </button>
+                    <button onClick={openWindow} className={'lg:block hidden text-gray-200 hover:text-gray-100 duration-300'}>
+                        <ArrowsExpandIcon className={'w-5'}/>
+                    </button>
                 </div>
+            }
+            </div>
         </div>
     );
 };
