@@ -26,3 +26,20 @@ On activation, inspect the first argument after `/team`:
 - anything else → print short help and exit
 
 If no argument is provided, print help.
+
+## Help Message
+
+When an unknown subcommand or no subcommand is given, output exactly:
+
+```
+Usage: /team <subcommand>
+
+Subcommands:
+  debug      Start interactive debugging swarm
+  review     Start interactive review team
+  research   Run research team (pass query as argument)
+
+Example:
+  /team research "Claude API caching best practices 2026"
+```
+
