@@ -68,3 +68,21 @@ When subcommand is `review`:
 2. Once context collected, proceed to spawn review team.
 3. User may cancel at any prompt.
 
+## Error Handling
+
+- Unknown subcommand or missing argument → print help message and exit.
+- User types "cancel" during interactive prompts → output "Session cancelled." and exit cleanly.
+- All agents return empty results → still write a report noting the failure and suggesting narrower scope or retry.
+- Duplicate slug → append `-2`, `-3`, etc. to keep filenames unique.
+- Agent failure mid-run → include partial findings and note which agents failed.
+
+## Agent Orchestration
+
+After context is gathered (or query received), the launcher spawns agents using the `Agent` tool:
+
+- Debugging swarm: 4–6 parallel `general-purpose` agents with different lenses + 1 synthesis agent.
+- Review team: 3–5 parallel agents (bugs, perf, security, maintainability, tests) + optional judge.
+- Research team: delegates to `deep-research` skill.
+
+The launcher decides whether to use simple parallel agent calls or a full `Workflow` based on task complexity.
+
