@@ -3,6 +3,7 @@ import { Button } from '@/components/elements/button/index';
 import Input from '@/components/elements/Input';
 import { PencilIcon, PuzzleIcon, RefreshIcon, TrashIcon } from '@heroicons/react/outline';
 import { InstalledPlugin } from '@/api/server/plugins/installed';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
     plugins: InstalledPlugin[];
@@ -12,7 +13,8 @@ interface Props {
     onUpdate: (file: string) => void;
 }
 
-export default ({ plugins, busy, onDelete, onRename, onUpdate }: Props) => {
+export default function InstalledPluginsPanel({ plugins, busy, onDelete, onRename, onUpdate }: Props) {
+    const { t } = useTranslation('arix/server/plugins');
     const [renaming, setRenaming] = useState<string | null>(null);
     const [name, setName] = useState('');
 
@@ -31,7 +33,7 @@ export default ({ plugins, busy, onDelete, onRename, onUpdate }: Props) => {
 
     return (
         <div className={'bg-gray-700 rounded-box backdrop p-5'}>
-            <p className={'font-medium text-gray-100 mb-3'}>Installed Plugins</p>
+            <p className={'font-medium text-gray-100 mb-3'}>{t('installed-plugins')}</p>
             <div className={'grid gap-2'}>
                 {plugins.length > 0 ? (
                     plugins.map((plugin) => {
@@ -115,4 +117,4 @@ export default ({ plugins, busy, onDelete, onRename, onUpdate }: Props) => {
             </div>
         </div>
     );
-};
+}

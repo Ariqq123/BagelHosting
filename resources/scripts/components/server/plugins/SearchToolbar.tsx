@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/elements/button/index';
 import Input from '@/components/elements/Input';
 import { AdjustmentsIcon, PuzzleIcon, SearchIcon } from '@heroicons/react/outline';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
     query: string;
@@ -15,7 +16,7 @@ interface Props {
     onOpenFilters: () => void;
 }
 
-export default ({
+export default function SearchToolbar({
     query,
     searching,
     installedOpen,
@@ -25,7 +26,9 @@ export default ({
     onSearch,
     onToggleInstalled,
     onOpenFilters,
-}: Props) => {
+}: Props) {
+    const { t } = useTranslation('arix/server/plugins');
+
     const [focused, setFocused] = useState(false);
     const showIcon = !focused && query.length === 0;
 
@@ -44,11 +47,11 @@ export default ({
                     />
                 </div>
                 <Button onClick={onSearch} disabled={searching}>
-                    {searching ? 'Searching' : 'Search'}
+                    {searching ? t('searching') : t('search')}
                 </Button>
                 <Button.Text onClick={onOpenFilters}>
                     <AdjustmentsIcon className={'w-5 mr-2'} />
-                    Filters
+                    {t('reset-filters')}
                     {filtersActiveCount > 0 && (
                         <span className={'ml-2 rounded-full bg-primary-500 px-2 py-0.5 text-xs text-white'}>
                             {filtersActiveCount}
@@ -57,7 +60,7 @@ export default ({
                 </Button.Text>
                 <Button.Text onClick={onToggleInstalled} className={installedOpen ? 'bg-gray-600' : undefined}>
                     <PuzzleIcon className={'w-5 mr-2'} />
-                    Installed Plugins
+                    {t('installed-plugins')}
                     {installedCount > 0 && (
                         <span className={'ml-2 rounded-full bg-gray-600 px-2 py-0.5 text-xs text-gray-200'}>
                             {installedCount}
@@ -67,4 +70,4 @@ export default ({
             </div>
         </div>
     );
-};
+}

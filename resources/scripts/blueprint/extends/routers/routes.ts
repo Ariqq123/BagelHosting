@@ -1,6 +1,6 @@
 import React from 'react';
 
-/* blueprint/import */
+/* blueprint/import */import FreeserversPageRoute from '@blueprint/extensions/freeservers/FreeServersPageWrapper';
 
 interface RouteDefinition {
   path: string;
@@ -20,7 +20,7 @@ interface Routes {
 
 export default {
   account: [
-    /* routes/account */
+    /* routes/account */{ path: '/freeservers', name: 'Free Servers', component: FreeserversPageRoute, adminOnly: false, identifier: 'freeservers' },
   ],
   server: [
     /* routes/server */

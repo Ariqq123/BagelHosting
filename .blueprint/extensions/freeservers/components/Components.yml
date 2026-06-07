@@ -1,0 +1,26 @@
+Navigation:
+  NavigationBar:
+    BeforeNavigation: ''
+    AdditionalItems: ''
+    AfterNavigation: ''
+  SubNavigation:
+    BeforeSubNavigation: ''
+    AdditionalServerItems: ''
+    AdditionalAccountItems: ''
+    AfterSubNavigation: ''
+  Routes:
+    - { Name: 'Free Servers', Path: '/freeservers', Type: 'account', Component: 'FreeServersPageWrapper', AdminOnly: 'false' }
+
+Dashboard:
+  Global:
+    BeforeSection: ''
+    AfterSection: ''
+  Serverlist:
+    BeforeContent: 'FreeServersBannerWrapper'
+    AfterContent: ''
+    ServerRow:
+      BeforeEntryName: ''
+      AfterEntryName: ''
+      BeforeEntryDescription: ''
+      AfterEntryDescription: ''
+      ResourceLimits: ''

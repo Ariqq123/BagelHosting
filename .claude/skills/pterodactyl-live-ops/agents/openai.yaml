@@ -1,0 +1,4 @@
+interface:
+  display_name: "Pterodactyl Live Ops"
+  short_description: "Debug live Pterodactyl, Blueprint, Wings, and cache issues safely."
+  default_prompt: "Investigate this live Pterodactyl panel issue safely. Start read-only, avoid tests, back up before DB writes, and verify route/assets/cache state before changing anything."

@@ -3,6 +3,7 @@ import { ServerPlugin } from '@/api/server/plugins/getServerPlugins';
 import { Button } from '@/components/elements/button/index';
 import { CloudDownloadIcon } from '@heroicons/react/outline';
 import { installedKey } from '@/components/server/plugins/utils';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
     plugins: ServerPlugin[];
@@ -16,9 +17,12 @@ interface Props {
     onDownload: (plugin: ServerPlugin) => void;
 }
 
-export default ({ plugins, installed, downloading, labels, onDownload }: Props) => (
-    <div className={'bg-gray-700 rounded-box backdrop p-5'}>
-        <p className={'font-medium text-gray-100 mb-3'}>Panel Plugin Catalog</p>
+export default function CuratedPluginsPanel({ plugins, installed, downloading, labels, onDownload }: Props) {
+    const { t } = useTranslation('arix/server/plugins');
+
+    return (
+        <div className={'bg-gray-700 rounded-box backdrop p-5'}>
+            <p className={'font-medium text-gray-100 mb-3'}>{t('plugins')}</p>
         <div className={'grid gap-3'}>
             {plugins.length > 0 ? (
                 plugins.map((plugin) => (
@@ -34,7 +38,7 @@ export default ({ plugins, installed, downloading, labels, onDownload }: Props) 
                             <p className={'text-xs text-gray-400 mt-1'}>{plugin.filename}</p>
                         </div>
                         {installed.has(installedKey(plugin.filename)) ? (
-                            <span className={'text-sm text-green-300'}>Plugin Installed</span>
+                            <span className={'text-sm text-green-300'}>{t('plugin-installed')}</span>
                         ) : (
                             <Button disabled={downloading !== null} onClick={() => onDownload(plugin)}>
                                 <CloudDownloadIcon className={'w-5 mr-2'} />
@@ -48,4 +52,5 @@ export default ({ plugins, installed, downloading, labels, onDownload }: Props) 
             )}
         </div>
     </div>
-);
+  );
+}

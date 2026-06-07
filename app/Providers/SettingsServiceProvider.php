@@ -30,6 +30,7 @@ class SettingsServiceProvider extends ServiceProvider
         'pterodactyl:client_features:allocations:enabled',
         'pterodactyl:client_features:allocations:range_start',
         'pterodactyl:client_features:allocations:range_end',
+        'arix:registration:allowed_domains',
     ];
 
     /**
@@ -84,6 +85,12 @@ class SettingsServiceProvider extends ServiceProvider
                 }
             }
 
+            if ($key === 'arix:registration:allowed_domains') {
+                $config->set(str_replace(':', '.', $key), $this->decodeRegistrationDomains($value));
+
+                continue;
+            }
+
             switch (strtolower($value)) {
                 case 'true':
                 case '(true)':
@@ -109,5 +116,24 @@ class SettingsServiceProvider extends ServiceProvider
     public static function getEncryptedKeys(): array
     {
         return self::$encrypted;
+    }
+
+    private function decodeRegistrationDomains(mixed $value): array
+    {
+        if (is_string($value)) {
+            $decoded = json_decode($value, true);
+            $value = is_array($decoded) ? $decoded : preg_split('/[\s,]+/', $value, -1, PREG_SPLIT_NO_EMPTY);
+        }
+
+        if (!is_array($value)) {
+            return [];
+        }
+
+        $domains = array_map(
+            static fn ($domain) => strtolower(trim((string) $domain)),
+            $value
+        );
+
+        return array_values(array_unique(array_filter($domains)));
     }
 }

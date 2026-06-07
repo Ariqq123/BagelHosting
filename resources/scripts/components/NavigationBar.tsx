@@ -13,6 +13,7 @@ import UserAvatar from '@/components/UserAvatar';
 import DropdownMenu, { DropdownLinkRow, DropdownButtonRow } from '@/components/elements/DropdownMenu';
 import { UserCircleIcon, CogIcon, EyeIcon, MoonIcon, LogoutIcon, MenuIcon, XIcon, ServerIcon, SupportIcon } from '@heroicons/react/outline';
 import { FaDiscord } from 'react-icons/fa';
+import { Scale } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import BeforeNavigation from '@blueprint/components/Navigation/NavigationBar/BeforeNavigation';
@@ -213,7 +214,7 @@ export default ({ children }: Props) => {
                 <RightNavigation>
                     {hasDiscord && <>{guildData !== null ? <a href={guildData.instant_invite}><FaDiscord /> Discord</a> : <a href={''}><FaDiscord />Discord</a>}</>}
                     {support && <a href={support}><SupportIcon className={'w-5'} />{t`supportcenter`}</a>}
-                    {tosContent && <a href="/tos">Terms of Service</a>}
+                    {tosContent && <a href="/tos"><Scale className="w-5 inline" /> Terms of Service</a>}
                     <AdditionalItems />
                     {layout == 3 && <ClientDropdown />}
                 </RightNavigation>
@@ -245,7 +246,7 @@ export default ({ children }: Props) => {
                         </NavLink>
                         {hasDiscord && <>{guildData !== null ? <a href={guildData.instant_invite}><FaDiscord /> Discord</a> : <a href={''}><FaDiscord />Discord</a>}</>}
                         {support !== 'none' && <a href={support}><SupportIcon className={'w-5'} />{t`supportcenter`}</a>}
-                        {tosContent && <a href="/tos">Terms of Service</a>}
+                        {tosContent && <a href="/tos"><Scale className="w-5 inline" /> Terms of Service</a>}
                     </div>
                     {children}
                 </MobileLinks>

@@ -20,7 +20,21 @@ class MailSettingsFormRequest extends AdminFormRequest
             'mail:mailers:smtp:password' => 'nullable|string|max:191',
             'mail:from:address' => 'required|string|email',
             'mail:from:name' => 'nullable|string|max:191',
+            'arix:registration:allowed_domains' => 'nullable|string|max:2000',
         ];
+    }
+
+    public function withValidator($validator): void
+    {
+        $validator->after(function ($validator) {
+            foreach ($this->registrationDomains() as $domain) {
+                if (!preg_match('/^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]$/', $domain)) {
+                    $validator->errors()->add('arix:registration:allowed_domains', 'Registration domains must be valid domain names.');
+
+                    return;
+                }
+            }
+        });
     }
 
     /**
@@ -35,6 +49,16 @@ class MailSettingsFormRequest extends AdminFormRequest
             unset($keys['mail:mailers:smtp:password']);
         }
 
-        return $this->only(array_flip($keys));
+        $values = $this->only(array_flip($keys));
+        $values['arix:registration:allowed_domains'] = json_encode($this->registrationDomains());
+
+        return $values;
+    }
+
+    private function registrationDomains(): array
+    {
+        $domains = preg_split('/[\s,]+/', strtolower((string) $this->input('arix:registration:allowed_domains')), -1, PREG_SPLIT_NO_EMPTY);
+
+        return array_values(array_unique(array_map('trim', $domains ?: [])));
     }
 }

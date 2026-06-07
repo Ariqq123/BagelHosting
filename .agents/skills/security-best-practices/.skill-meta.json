@@ -1,0 +1,14 @@
+{
+  "libraryRepo": "Ariqq123/BagelHosting",
+  "sourceType": "github",
+  "source": "github",
+  "url": "https://github.com/openai/skills",
+  "repo": "openai/skills",
+  "ref": null,
+  "subpath": "skills/.curated/security-best-practices",
+  "installSource": "openai/skills/skills/.curated/security-best-practices",
+  "skillName": "security-best-practices",
+  "scope": "project",
+  "installedAt": "2026-06-05T06:38:48.044Z",
+  "updatedAt": "2026-06-05T06:38:48.044Z"
+}

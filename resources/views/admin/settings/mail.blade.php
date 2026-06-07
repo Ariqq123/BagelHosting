@@ -95,6 +95,16 @@
                                     </div>
                                 </div>
                             </div>
+                            <div class="row">
+                                <hr />
+                                <div class="form-group col-md-12">
+                                    <label class="control-label">Registration Email Domains <span class="field-optional"></span></label>
+                                    <div>
+                                        <textarea class="form-control" rows="4" name="arix:registration:allowed_domains">{{ old('arix:registration:allowed_domains', implode("\n", config('arix.registration.allowed_domains', []))) }}</textarea>
+                                        <p class="text-muted small">Enter the email domains allowed to register, separated by commas or new lines. Subdomains are allowed automatically for each domain.</p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                         <div class="box-footer">
                             {{ csrf_field() }}
@@ -126,7 +136,8 @@
                     'mail:mailers:smtp:username': $('input[name="mail:mailers:smtp:username"]').val(),
                     'mail:mailers:smtp:password': $('input[name="mail:mailers:smtp:password"]').val(),
                     'mail:from:address': $('input[name="mail:from:address"]').val(),
-                    'mail:from:name': $('input[name="mail:from:name"]').val()
+                    'mail:from:name': $('input[name="mail:from:name"]').val(),
+                    'arix:registration:allowed_domains': $('textarea[name="arix:registration:allowed_domains"]').val()
                 }),
                 headers: { 'X-CSRF-Token': $('input[name="_token"]').val() }
             }).fail(function (jqXHR) {

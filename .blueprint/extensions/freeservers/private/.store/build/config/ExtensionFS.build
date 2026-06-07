@@ -1,0 +1,1 @@
+/* FreeserversStart */ 'blueprint:freeservers' => [ 'driver' => 'local', 'root' => storage_path('extensions/freeservers'), 'url' => env('APP_URL') . '/fs/extensions/freeservers', 'visibility' => 'public', 'throw' => false, ], 'blueprint_private:freeservers' => [ 'driver' => 'local', 'root' => storage_path('.extensions/freeservers'), 'throw' => false, ], /* FreeserversEnd */

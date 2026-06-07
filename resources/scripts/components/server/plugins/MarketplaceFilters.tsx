@@ -3,6 +3,7 @@ import { Button } from '@/components/elements/button/index';
 import Input from '@/components/elements/Input';
 import { MarketplacePlatform } from '@/api/server/plugins/marketplace';
 import { ChevronDownIcon, ChevronRightIcon } from '@heroicons/react/outline';
+import { useTranslation } from 'react-i18next';
 
 const MINECRAFT_VERSION_GROUPS = [
     { label: '26.1', versions: ['26.1.2', '26.1.1', '26.1'] },
@@ -95,7 +96,7 @@ const FilterSection = ({ title, summary, children }: SectionProps) => {
     );
 };
 
-export default ({
+export default function MarketplaceFilters({
     platform,
     version,
     loader,
@@ -104,7 +105,8 @@ export default ({
     onVersionChange,
     onLoaderChange,
     onReset,
-}: Props) => {
+}: Props) {
+    const { t } = useTranslation('arix/server/plugins');
     const [mobileOpen, setMobileOpen] = useState(false);
     const sheet = mode === 'sheet';
     const MobileIcon = mobileOpen ? ChevronDownIcon : ChevronRightIcon;
@@ -116,7 +118,7 @@ export default ({
         <div className={'bg-gray-700 rounded-box backdrop p-4 xl:p-5 xl:sticky xl:top-4 h-max'}>
             {sheet ? (
                 <div className={'mb-4'}>
-                    <p className={'font-medium text-gray-100'}>Filters</p>
+                    <p className={'font-medium text-gray-100'}>{t('reset-filters')}</p>
                     <p className={'text-xs text-gray-400'}>
                         {[platformLabel(platform), version || 'All versions'].join(' · ')}
                     </p>
@@ -129,14 +131,14 @@ export default ({
                         onClick={() => setMobileOpen((value) => !value)}
                     >
                         <span>
-                            <span className={'block font-medium text-gray-100'}>Filters</span>
+                            <span className={'block font-medium text-gray-100'}>{t('reset-filters')}</span>
                             <span className={'block text-xs text-gray-400'}>
                                 {[platformLabel(platform), version || 'All versions'].join(' · ')}
                             </span>
                         </span>
                         <MobileIcon className={'w-5 text-gray-300 flex-shrink-0'} />
                     </button>
-                    <p className={'hidden xl:block font-medium text-gray-100 mb-4'}>Filters</p>
+                    <p className={'hidden xl:block font-medium text-gray-100 mb-4'}>{t('reset-filters')}</p>
                 </>
             )}
             <div className={sheet || mobileOpen ? 'space-y-4 mt-4 xl:mt-0' : 'hidden xl:block xl:space-y-4'}>
@@ -155,7 +157,7 @@ export default ({
                 </div>
 
                 <div>
-                    <p className={'text-xs uppercase text-gray-400 mb-2'}>Version</p>
+                    <p className={'text-xs uppercase text-gray-400 mb-2'}>{t('version')}</p>
                     <div className={'space-y-2 max-h-72 overflow-y-auto pr-1'}>
                         <button
                             type={'button'}
@@ -211,7 +213,7 @@ export default ({
                 </div>
 
                 <FilterSection
-                    title={'Loader'}
+                    title={t('loader')}
                     summary={['modrinth', 'hangar'].includes(platform) ? loader : 'Modrinth/Hangar only'}
                 >
                     <div className={'grid grid-cols-2 gap-2'}>
@@ -240,4 +242,4 @@ export default ({
             </div>
         </div>
     );
-};
+}

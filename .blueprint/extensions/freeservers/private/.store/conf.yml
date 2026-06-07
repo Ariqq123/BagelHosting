@@ -1,0 +1,23 @@
+info:
+  name: "Free Servers"
+  identifier: "freeservers"
+  description: "Allows admins to offer free servers to users."
+  version: "1.0.0"
+  target: "beta-2026-01"
+  author: "Michael Ortner"
+  icon: "icon.jpg"
+
+admin:
+  view: "admin/view.blade.php"
+  controller: "admin/controller.php"
+
+dashboard:
+  components: "components"
+
+requests:
+  app: "app"
+  routers:
+    client: "routers/client.php"
+
+database:
+  migrations: "migrations"

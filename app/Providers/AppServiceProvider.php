@@ -50,6 +50,8 @@ class AppServiceProvider extends ServiceProvider
             'schedule' => Models\Schedule::class,
             'server' => Models\Server::class,
             'ssh_key' => Models\UserSSHKey::class,
+            'subdomain' => Models\Subdomain::class,
+            'subdomain_domain' => Models\SubdomainDomain::class,
             'task' => Models\Task::class,
             'user' => Models\User::class,
         ]);

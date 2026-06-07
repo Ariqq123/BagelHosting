@@ -1,0 +1,14 @@
+{
+  "libraryRepo": "Ariqq123/BagelHosting",
+  "sourceType": "github",
+  "source": "github",
+  "url": "https://github.com/shadcn-ui/ui",
+  "repo": "shadcn-ui/ui",
+  "ref": null,
+  "subpath": "skills/shadcn",
+  "installSource": "shadcn-ui/ui/skills/shadcn",
+  "skillName": "shadcn",
+  "scope": "project",
+  "installedAt": "2026-06-05T06:38:45.734Z",
+  "updatedAt": "2026-06-05T06:38:45.734Z"
+}

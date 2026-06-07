@@ -1,0 +1,163 @@
+<?php
+
+return [
+    // Admin - Header & Navigation
+    'admin_title' => 'Free Servers',
+    'admin_subtitle' => 'Offer free servers to users',
+    'breadcrumb_admin' => 'Admin',
+    'breadcrumb_extensions' => 'Extensions',
+    'breadcrumb_freeservers' => 'Free Servers',
+
+    // Admin - Stats Cards
+    'stat_active_servers' => 'Active Free Servers',
+    'stat_users_with_servers' => 'Users with Free Servers',
+    'stat_allowed_eggs' => 'Allowed Eggs',
+    'stat_system_status' => 'System Status',
+    'status_on' => 'ON',
+    'status_off' => 'OFF',
+
+    // Admin - Statistics Dashboard
+    'stats_dashboard_title' => 'Statistics Dashboard',
+    'stats_total_servers' => 'Total Servers',
+    'stats_active_now' => 'Active Now',
+    'stats_created_today' => 'Created Today',
+    'stats_expiring_soon' => 'Expiring Soon (7d)',
+    'stats_resources' => 'Resources',
+    'stats_memory' => 'Memory',
+    'stats_disk' => 'Disk',
+    'stats_avg_cpu' => 'Avg CPU',
+    'stats_top_users' => 'Top Users',
+    'stats_no_data' => 'No data yet',
+
+    // Admin - Settings Section
+    'section_settings' => 'Settings',
+    'setting_enable_system' => 'Enable Free Servers',
+    'setting_enabled' => 'Enabled',
+    'setting_disabled' => 'Disabled',
+    'setting_max_servers' => 'Max Servers per User',
+    'setting_description' => 'Server Description',
+    'setting_description_placeholder' => 'Free Server created via Free Servers Extension',
+    'setting_description_help' => 'This description will be used for every created free server.',
+    'setting_display_unit' => 'Resource Display Unit',
+    'setting_display_unit_mb' => 'MB (Megabyte)',
+    'setting_display_unit_gb' => 'GB (Gigabyte)',
+    'setting_display_unit_help' => 'Choose how memory and disk are displayed to users.',
+    'setting_language' => 'Language / Sprache',
+    'setting_language_help' => 'Choose the interface language for all users (17 European languages supported).',
+
+    // Admin - Expiration Settings
+    'section_expiration' => 'Server Expiration & Extensions',
+    'setting_expiration_days' => 'Expiration Days',
+    'setting_expiration_days_help' => 'Days until server expires (0 = never expires)',
+    'setting_extension_days' => 'Extension Days',
+    'setting_extension_days_help' => 'Days added when user extends server',
+    'setting_allow_extension' => 'Allow User Extensions',
+    'setting_allow_extension_help' => 'Users can extend expiration date',
+    'yes' => 'Yes',
+    'no' => 'No',
+
+    // Admin - Stats Dashboard Settings
+    'section_stats' => 'Admin Dashboard Stats',
+    'setting_enable_stats' => 'Enable Statistics Dashboard',
+    'setting_enable_stats_help' => 'Show statistics dashboard in admin panel',
+
+    // Admin - Discord Integration
+    'section_discord' => 'Discord Webhook Integration',
+    'setting_discord_webhook' => 'Discord Webhook URL',
+    'setting_discord_webhook_placeholder' => 'https://discord.com/api/webhooks/...',
+    'setting_discord_webhook_help' => 'Leave empty to disable Discord notifications',
+    'setting_discord_create' => 'Notify on Server Creation',
+    'setting_discord_delete' => 'Notify on Server Deletion',
+    'setting_discord_expire' => 'Notify on Server Expiration',
+
+    // Admin - Default Resources
+    'section_resources' => 'Default Resources',
+    'resource_ram' => 'RAM (MB)',
+    'resource_disk' => 'Disk (MB)',
+    'resource_cpu' => 'CPU (%)',
+    'resource_swap' => 'Swap (MB)',
+    'resource_io' => 'Block IO',
+    'resource_databases' => 'Databases',
+    'resource_ports' => 'Ports',
+    'resource_backups' => 'Backups',
+
+    // Admin - Allowed Nodes
+    'section_nodes' => 'Allowed Nodes',
+    'nodes_help' => 'If no nodes are selected, all nodes are allowed.',
+    'nodes_none' => 'No nodes available.',
+
+    // Admin - Buttons
+    'btn_save' => 'Save Settings',
+    'btn_add' => 'Add',
+    'btn_enable' => 'Enable',
+    'btn_disable' => 'Disable',
+    'btn_remove' => 'Remove',
+
+    // Admin - Eggs Section
+    'section_eggs' => 'Allowed Eggs',
+    'egg_select' => '-- Select Egg --',
+    'egg_custom_name' => 'Custom Name',
+    'egg_status_active' => 'Active',
+    'egg_status_disabled' => 'Disabled',
+    'eggs_none' => 'No eggs added yet. Add eggs above to make them available for free servers.',
+    'eggs_confirm_remove' => 'Really remove this egg?',
+
+    // Admin - Per-User Limits
+    'section_user_limits' => 'Per-User Limits',
+    'user_limits_help' => 'Set custom server limits for individual users. Users without a custom limit use the global limit (%s).',
+    'user_search' => 'Search User',
+    'user_search_placeholder' => 'Search by username or email...',
+    'user_selected' => 'Selected User',
+    'user_no_selected' => 'No user selected',
+    'user_max_servers' => 'Max Servers',
+    'user_add_limit' => 'Add Limit',
+    'table_username' => 'Username',
+    'table_email' => 'Email',
+    'table_max_servers' => 'Max Servers',
+    'table_current' => 'Current',
+    'table_status' => 'Status',
+    'table_actions' => 'Actions',
+    'status_blocked' => 'Blocked',
+    'status_at_limit' => 'At Limit',
+    'status_can_create' => 'Can Create',
+    'user_limits_none' => 'No custom user limits set. All users use the global limit of <strong>%s</strong> servers.',
+    'user_has_limit' => 'Has Limit',
+    'user_limit_confirm_remove' => 'Remove custom limit for %s? They will use the global limit.',
+    'user_search_no_results' => 'No users found',
+    'user_search_error' => 'Error searching users',
+    'user_select_first' => 'Please select a user first!',
+
+    // Admin - Alerts & Messages
+    'alert_db_error' => 'Database tables not found. Please run: php artisan migrate',
+    'alert_settings_error' => 'Settings could not be loaded. Please reload the page.',
+    'msg_success_save' => 'Settings saved successfully!',
+    'msg_error_unknown' => 'Unknown action.',
+    'msg_error_select_egg' => 'Please select an egg!',
+    'msg_error_egg_exists' => 'Egg already exists!',
+    'msg_success_egg_add' => 'Egg added successfully!',
+    'msg_success_status' => 'Status changed!',
+    'msg_success_egg_remove' => 'Egg removed successfully!',
+    'msg_error_select_user' => 'Please select a user!',
+    'msg_error_negative' => 'Max servers cannot be negative!',
+    'msg_error_user_not_found' => 'User not found!',
+    'msg_error_limit_exists' => 'User already has a custom limit!',
+    'msg_success_limit_set' => 'Custom limit set for %s!',
+    'msg_error_limit_not_found' => 'Limit not found!',
+    'msg_success_limit_update' => 'Limit updated successfully!',
+    'msg_success_limit_remove' => '%s now uses the global limit.',
+
+    // Client API - Error Messages
+    'api_disabled' => 'Free Servers are currently disabled.',
+    'api_tables_missing' => 'Free Servers tables not found. Please run php artisan migrate.',
+    'api_egg_not_available' => 'This egg is not available for free servers.',
+    'api_node_not_available' => 'This node is not available for free servers.',
+    'api_limit_reached' => 'You have already reached the maximum number of free servers.',
+    'api_no_ports' => 'No free ports available on this node.',
+    'api_no_docker' => 'No Docker image configured for this egg. Please contact an administrator.',
+    'api_success_create' => 'Server created successfully!',
+    'api_port_taken' => 'The selected port was taken. Please try again.',
+    'api_error_create' => 'Error creating server: %s',
+    'api_extension_disabled' => 'Server extension is not allowed.',
+    'api_server_not_found' => 'Server not found or not owned by you.',
+    'api_success_extend' => 'Server extended successfully!',
+];

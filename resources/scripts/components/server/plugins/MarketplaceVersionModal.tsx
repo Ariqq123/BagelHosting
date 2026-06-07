@@ -4,6 +4,7 @@ import Spinner from '@/components/elements/Spinner';
 import { Button } from '@/components/elements/button/index';
 import { MarketplacePlugin, MarketplaceVersion } from '@/api/server/plugins/marketplace';
 import { formatDate, installedKey } from '@/components/server/plugins/utils';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
     plugin: MarketplacePlugin;
@@ -15,7 +16,10 @@ interface Props {
     onInstall: (version: MarketplaceVersion) => void;
 }
 
-export default ({ plugin, versions, installed, loading, installing, onDismissed, onInstall }: Props) => (
+export default function MarketplaceVersionModal({ plugin, versions, installed, loading, installing, onDismissed, onInstall }: Props) {
+    const { t } = useTranslation('arix/server/plugins');
+
+    return (
     <Modal visible appear onDismissed={onDismissed} showSpinnerOverlay={installing}>
         <div className={'space-y-4'}>
             <div>
@@ -45,10 +49,10 @@ export default ({ plugin, versions, installed, loading, installing, onDismissed,
                                     </p>
                                 </div>
                                 {exists ? (
-                                    <span className={'text-sm text-green-300'}>Installed</span>
+                                    <span className={'text-sm text-green-300'}>{t('plugin-installed')}</span>
                                 ) : (
                                     <Button disabled={installing} onClick={() => onInstall(item)}>
-                                        {versions.length === 1 ? 'Install' : 'Install Version'}
+                                        {versions.length === 1 ? t('install.install-plugin') : t('install.select-version')}
                                     </Button>
                                 )}
                             </div>
@@ -56,8 +60,9 @@ export default ({ plugin, versions, installed, loading, installing, onDismissed,
                     })}
                 </div>
             ) : (
-                <p className={'text-sm text-gray-300'}>No compatible versions found.</p>
+                <p className={'text-sm text-gray-300'}>{t('no-compatible-versions')}</p>
             )}
         </div>
     </Modal>
-);
+  );
+}

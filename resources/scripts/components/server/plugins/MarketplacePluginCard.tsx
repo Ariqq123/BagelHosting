@@ -10,6 +10,7 @@ import {
     SwitchHorizontalIcon,
 } from '@heroicons/react/outline';
 import { formatNumber, formatRelativeDate } from '@/components/server/plugins/utils';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
     plugin: MarketplacePlugin;
@@ -19,7 +20,10 @@ interface Props {
     onSelectVersion: (plugin: MarketplacePlugin) => void;
 }
 
-export default ({ plugin, installed, installing, onInstallLatest, onSelectVersion }: Props) => (
+export default function MarketplacePluginCard({ plugin, installed, installing, onInstallLatest, onSelectVersion }: Props) {
+    const { t } = useTranslation('arix/server/plugins');
+
+    return (
     <div className={'bg-gray-700 rounded-box backdrop p-5 flex flex-col min-w-0 min-h-[15rem]'}>
         <div className={'flex items-start gap-4 min-w-0'}>
             {plugin.iconUrl ? (
@@ -47,19 +51,19 @@ export default ({ plugin, installed, installing, onInstallLatest, onSelectVersio
                 </div>
                 {plugin.author && (
                     <p className={'text-sm text-gray-400 truncate'}>
-                        By <span className={'underline'}>{plugin.author}</span>
+                        {t('by')} <span className={'underline'}>{plugin.author}</span>
                     </p>
                 )}
             </div>
         </div>
 
         <p className={'text-sm md:text-base text-gray-300 line-clamp-2 min-h-[2.75rem] mt-4'}>
-            {plugin.description || 'No description provided.'}
+            {plugin.description || t('no-description')}
         </p>
 
         <div className={'flex items-center text-sm text-gray-300 mt-3 min-w-0'}>
             <CalendarIcon className={'w-5 mr-1 flex-shrink-0'} />
-            <span className={'truncate'}>Last updated {formatRelativeDate(plugin.updatedAt)}</span>
+            <span className={'truncate'}>{t('last-updated')} {formatRelativeDate(plugin.updatedAt)}</span>
         </div>
 
         <div className={'mt-auto pt-5 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3'}>
@@ -80,19 +84,20 @@ export default ({ plugin, installed, installing, onInstallLatest, onSelectVersio
                         'text-sm text-green-300 bg-green-900 bg-opacity-30 rounded-component px-4 py-2 text-center sm:min-w-[10rem]'
                     }
                 >
-                    Installed
+                    {t('plugin-installed')}
                 </div>
             ) : (
                 <div className={'grid grid-cols-2 gap-2 sm:min-w-[14rem]'}>
                     <Button disabled={installing} onClick={() => onInstallLatest(plugin)}>
-                        Install
+                        {t('install.install-plugin')}
                     </Button>
                     <Button.Text disabled={installing} onClick={() => onSelectVersion(plugin)}>
                         <SwitchHorizontalIcon className={'w-4 mr-1'} />
-                        Versions
+                        {t('install.select-version')}
                     </Button.Text>
                 </div>
             )}
         </div>
     </div>
-);
+  );
+}

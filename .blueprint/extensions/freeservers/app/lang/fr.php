@@ -1,0 +1,163 @@
+<?php
+
+return [
+    // Admin - Header & Navigation
+    'admin_title' => 'Serveurs Gratuits',
+    'admin_subtitle' => 'Offrez des serveurs gratuits aux utilisateurs',
+    'breadcrumb_admin' => 'Admin',
+    'breadcrumb_extensions' => 'Extensions',
+    'breadcrumb_freeservers' => 'Serveurs Gratuits',
+
+    // Admin - Stats Cards
+    'stat_active_servers' => 'Serveurs Gratuits Actifs',
+    'stat_users_with_servers' => 'Utilisateurs avec Serveurs Gratuits',
+    'stat_allowed_eggs' => 'Eggs Autorisés',
+    'stat_system_status' => 'Statut du Système',
+    'status_on' => 'ACTIVÉ',
+    'status_off' => 'DÉSACTIVÉ',
+
+    // Admin - Statistics Dashboard
+    'stats_dashboard_title' => 'Tableau de Bord des Statistiques',
+    'stats_total_servers' => 'Serveurs Total',
+    'stats_active_now' => 'Actifs Maintenant',
+    'stats_created_today' => 'Créés Aujourd\'hui',
+    'stats_expiring_soon' => 'Expire Bientôt (7j)',
+    'stats_resources' => 'Ressources',
+    'stats_memory' => 'Mémoire',
+    'stats_disk' => 'Disque',
+    'stats_avg_cpu' => 'CPU Moyen',
+    'stats_top_users' => 'Top Utilisateurs',
+    'stats_no_data' => 'Pas encore de données',
+
+    // Admin - Settings Section
+    'section_settings' => 'Paramètres',
+    'setting_enable_system' => 'Activer les Serveurs Gratuits',
+    'setting_enabled' => 'Activé',
+    'setting_disabled' => 'Désactivé',
+    'setting_max_servers' => 'Max. Serveurs par Utilisateur',
+    'setting_description' => 'Description du Serveur',
+    'setting_description_placeholder' => 'Serveur Gratuit créé via Free Servers Extension',
+    'setting_description_help' => 'Cette description sera utilisée pour chaque serveur gratuit créé.',
+    'setting_display_unit' => 'Unité d\'Affichage des Ressources',
+    'setting_display_unit_mb' => 'MB (Mégaoctet)',
+    'setting_display_unit_gb' => 'GB (Gigaoctet)',
+    'setting_display_unit_help' => 'Choisissez comment la mémoire et le disque sont affichés aux utilisateurs.',
+    'setting_language' => 'Langue / Language',
+    'setting_language_help' => 'Choisissez la langue de l\'interface pour tous les utilisateurs (17 langues européennes supportées).',
+
+    // Admin - Expiration Settings
+    'section_expiration' => 'Expiration et Extensions de Serveur',
+    'setting_expiration_days' => 'Jours d\'Expiration',
+    'setting_expiration_days_help' => 'Jours jusqu\'à l\'expiration du serveur (0 = n\'expire jamais)',
+    'setting_extension_days' => 'Jours d\'Extension',
+    'setting_extension_days_help' => 'Jours ajoutés lorsque l\'utilisateur prolonge le serveur',
+    'setting_allow_extension' => 'Autoriser les Extensions Utilisateur',
+    'setting_allow_extension_help' => 'Les utilisateurs peuvent prolonger la date d\'expiration',
+    'yes' => 'Oui',
+    'no' => 'Non',
+
+    // Admin - Stats Dashboard Settings
+    'section_stats' => 'Statistiques du Tableau de Bord Admin',
+    'setting_enable_stats' => 'Activer le Tableau de Bord des Statistiques',
+    'setting_enable_stats_help' => 'Afficher le tableau de bord des statistiques dans le panneau admin',
+
+    // Admin - Discord Integration
+    'section_discord' => 'Intégration Webhook Discord',
+    'setting_discord_webhook' => 'URL Webhook Discord',
+    'setting_discord_webhook_placeholder' => 'https://discord.com/api/webhooks/...',
+    'setting_discord_webhook_help' => 'Laisser vide pour désactiver les notifications Discord',
+    'setting_discord_create' => 'Notifier lors de la Création de Serveur',
+    'setting_discord_delete' => 'Notifier lors de la Suppression de Serveur',
+    'setting_discord_expire' => 'Notifier lors de l\'Expiration de Serveur',
+
+    // Admin - Default Resources
+    'section_resources' => 'Ressources par Défaut',
+    'resource_ram' => 'RAM (MB)',
+    'resource_disk' => 'Disque (MB)',
+    'resource_cpu' => 'CPU (%)',
+    'resource_swap' => 'Swap (MB)',
+    'resource_io' => 'Block IO',
+    'resource_databases' => 'Bases de Données',
+    'resource_ports' => 'Ports',
+    'resource_backups' => 'Sauvegardes',
+
+    // Admin - Allowed Nodes
+    'section_nodes' => 'Nodes Autorisés',
+    'nodes_help' => 'Si aucun node n\'est sélectionné, tous les nodes sont autorisés.',
+    'nodes_none' => 'Aucun node disponible.',
+
+    // Admin - Buttons
+    'btn_save' => 'Enregistrer les Paramètres',
+    'btn_add' => 'Ajouter',
+    'btn_enable' => 'Activer',
+    'btn_disable' => 'Désactiver',
+    'btn_remove' => 'Supprimer',
+
+    // Admin - Eggs Section
+    'section_eggs' => 'Eggs Autorisés',
+    'egg_select' => '-- Sélectionner Egg --',
+    'egg_custom_name' => 'Nom Personnalisé',
+    'egg_status_active' => 'Actif',
+    'egg_status_disabled' => 'Désactivé',
+    'eggs_none' => 'Aucun egg ajouté. Ajoutez des eggs ci-dessus pour les rendre disponibles pour les serveurs gratuits.',
+    'eggs_confirm_remove' => 'Vraiment supprimer cet egg?',
+
+    // Admin - Per-User Limits
+    'section_user_limits' => 'Limites par Utilisateur',
+    'user_limits_help' => 'Définir des limites de serveur personnalisées pour les utilisateurs individuels. Les utilisateurs sans limite personnalisée utilisent la limite globale (%s).',
+    'user_search' => 'Rechercher Utilisateur',
+    'user_search_placeholder' => 'Rechercher par nom d\'utilisateur ou email...',
+    'user_selected' => 'Utilisateur Sélectionné',
+    'user_no_selected' => 'Aucun utilisateur sélectionné',
+    'user_max_servers' => 'Max. Serveurs',
+    'user_add_limit' => 'Ajouter Limite',
+    'table_username' => 'Nom d\'Utilisateur',
+    'table_email' => 'Email',
+    'table_max_servers' => 'Max. Serveurs',
+    'table_current' => 'Actuel',
+    'table_status' => 'Statut',
+    'table_actions' => 'Actions',
+    'status_blocked' => 'Bloqué',
+    'status_at_limit' => 'À la Limite',
+    'status_can_create' => 'Peut Créer',
+    'user_limits_none' => 'Aucune limite utilisateur personnalisée définie. Tous les utilisateurs utilisent la limite globale de <strong>%s</strong> serveurs.',
+    'user_has_limit' => 'A une Limite',
+    'user_limit_confirm_remove' => 'Supprimer la limite personnalisée pour %s? Ils utiliseront la limite globale.',
+    'user_search_no_results' => 'Aucun utilisateur trouvé',
+    'user_search_error' => 'Erreur lors de la recherche d\'utilisateurs',
+    'user_select_first' => 'Veuillez d\'abord sélectionner un utilisateur!',
+
+    // Admin - Alerts & Messages
+    'alert_db_error' => 'Tables de base de données introuvables. Veuillez exécuter: php artisan migrate',
+    'alert_settings_error' => 'Impossible de charger les paramètres. Veuillez recharger la page.',
+    'msg_success_save' => 'Paramètres enregistrés avec succès!',
+    'msg_error_unknown' => 'Action inconnue.',
+    'msg_error_select_egg' => 'Veuillez sélectionner un egg!',
+    'msg_error_egg_exists' => 'L\'egg existe déjà!',
+    'msg_success_egg_add' => 'Egg ajouté avec succès!',
+    'msg_success_status' => 'Statut modifié!',
+    'msg_success_egg_remove' => 'Egg supprimé avec succès!',
+    'msg_error_select_user' => 'Veuillez sélectionner un utilisateur!',
+    'msg_error_negative' => 'Le nombre maximum de serveurs ne peut pas être négatif!',
+    'msg_error_user_not_found' => 'Utilisateur introuvable!',
+    'msg_error_limit_exists' => 'L\'utilisateur a déjà une limite personnalisée!',
+    'msg_success_limit_set' => 'Limite personnalisée définie pour %s!',
+    'msg_error_limit_not_found' => 'Limite introuvable!',
+    'msg_success_limit_update' => 'Limite mise à jour avec succès!',
+    'msg_success_limit_remove' => '%s utilise maintenant la limite globale.',
+
+    // Client API - Error Messages
+    'api_disabled' => 'Les serveurs gratuits sont actuellement désactivés.',
+    'api_tables_missing' => 'Tables Free Servers introuvables. Veuillez exécuter php artisan migrate.',
+    'api_egg_not_available' => 'Cet egg n\'est pas disponible pour les serveurs gratuits.',
+    'api_node_not_available' => 'Ce node n\'est pas disponible pour les serveurs gratuits.',
+    'api_limit_reached' => 'Vous avez déjà atteint le nombre maximum de serveurs gratuits.',
+    'api_no_ports' => 'Aucun port libre disponible sur ce node.',
+    'api_no_docker' => 'Aucune image Docker configurée pour cet egg. Veuillez contacter un administrateur.',
+    'api_success_create' => 'Serveur créé avec succès!',
+    'api_port_taken' => 'Le port sélectionné a été pris. Veuillez réessayer.',
+    'api_error_create' => 'Erreur lors de la création du serveur: %s',
+    'api_extension_disabled' => 'L\'extension de serveur n\'est pas autorisée.',
+    'api_server_not_found' => 'Serveur introuvable ou ne vous appartient pas.',
+    'api_success_extend' => 'Serveur prolongé avec succès!',
+];

@@ -1,0 +1,163 @@
+<?php
+
+return [
+    // Admin - Header & Navigation
+    'admin_title' => 'Kostenlose Server',
+    'admin_subtitle' => 'Biete Benutzern kostenlose Server an',
+    'breadcrumb_admin' => 'Admin',
+    'breadcrumb_extensions' => 'Erweiterungen',
+    'breadcrumb_freeservers' => 'Kostenlose Server',
+
+    // Admin - Stats Cards
+    'stat_active_servers' => 'Aktive Kostenlose Server',
+    'stat_users_with_servers' => 'Benutzer mit Kostenlosen Servern',
+    'stat_allowed_eggs' => 'Erlaubte Eggs',
+    'stat_system_status' => 'System Status',
+    'status_on' => 'EIN',
+    'status_off' => 'AUS',
+
+    // Admin - Statistics Dashboard
+    'stats_dashboard_title' => 'Statistik-Dashboard',
+    'stats_total_servers' => 'Server Gesamt',
+    'stats_active_now' => 'Jetzt Aktiv',
+    'stats_created_today' => 'Heute Erstellt',
+    'stats_expiring_soon' => 'Läuft Bald Ab (7T)',
+    'stats_resources' => 'Ressourcen',
+    'stats_memory' => 'Arbeitsspeicher',
+    'stats_disk' => 'Festplatte',
+    'stats_avg_cpu' => 'Durchschn. CPU',
+    'stats_top_users' => 'Top Benutzer',
+    'stats_no_data' => 'Noch keine Daten',
+
+    // Admin - Settings Section
+    'section_settings' => 'Einstellungen',
+    'setting_enable_system' => 'Kostenlose Server Aktivieren',
+    'setting_enabled' => 'Aktiviert',
+    'setting_disabled' => 'Deaktiviert',
+    'setting_max_servers' => 'Max. Server pro Benutzer',
+    'setting_description' => 'Server-Beschreibung',
+    'setting_description_placeholder' => 'Kostenloser Server erstellt über Free Servers Extension',
+    'setting_description_help' => 'Diese Beschreibung wird für jeden erstellten kostenlosen Server verwendet.',
+    'setting_display_unit' => 'Ressourcen-Anzeigeeinheit',
+    'setting_display_unit_mb' => 'MB (Megabyte)',
+    'setting_display_unit_gb' => 'GB (Gigabyte)',
+    'setting_display_unit_help' => 'Wähle, wie Arbeitsspeicher und Festplatte den Benutzern angezeigt werden.',
+    'setting_language' => 'Sprache / Language',
+    'setting_language_help' => 'Wähle die Oberflächensprache für alle Benutzer (17 europäische Sprachen unterstützt).',
+
+    // Admin - Expiration Settings
+    'section_expiration' => 'Server-Ablauf & Verlängerungen',
+    'setting_expiration_days' => 'Ablauftage',
+    'setting_expiration_days_help' => 'Tage bis Server abläuft (0 = läuft nie ab)',
+    'setting_extension_days' => 'Verlängerungstage',
+    'setting_extension_days_help' => 'Tage, die bei Verlängerung hinzugefügt werden',
+    'setting_allow_extension' => 'Benutzer-Verlängerungen Erlauben',
+    'setting_allow_extension_help' => 'Benutzer können Ablaufdatum verlängern',
+    'yes' => 'Ja',
+    'no' => 'Nein',
+
+    // Admin - Stats Dashboard Settings
+    'section_stats' => 'Admin-Dashboard-Statistiken',
+    'setting_enable_stats' => 'Statistik-Dashboard Aktivieren',
+    'setting_enable_stats_help' => 'Zeige Statistik-Dashboard im Admin-Panel',
+
+    // Admin - Discord Integration
+    'section_discord' => 'Discord-Webhook-Integration',
+    'setting_discord_webhook' => 'Discord-Webhook-URL',
+    'setting_discord_webhook_placeholder' => 'https://discord.com/api/webhooks/...',
+    'setting_discord_webhook_help' => 'Leer lassen, um Discord-Benachrichtigungen zu deaktivieren',
+    'setting_discord_create' => 'Bei Server-Erstellung Benachrichtigen',
+    'setting_discord_delete' => 'Bei Server-Löschung Benachrichtigen',
+    'setting_discord_expire' => 'Bei Server-Ablauf Benachrichtigen',
+
+    // Admin - Default Resources
+    'section_resources' => 'Standard-Ressourcen',
+    'resource_ram' => 'RAM (MB)',
+    'resource_disk' => 'Festplatte (MB)',
+    'resource_cpu' => 'CPU (%)',
+    'resource_swap' => 'Swap (MB)',
+    'resource_io' => 'Block-IO',
+    'resource_databases' => 'Datenbanken',
+    'resource_ports' => 'Ports',
+    'resource_backups' => 'Backups',
+
+    // Admin - Allowed Nodes
+    'section_nodes' => 'Erlaubte Nodes',
+    'nodes_help' => 'Wenn keine Nodes ausgewählt sind, sind alle Nodes erlaubt.',
+    'nodes_none' => 'Keine Nodes verfügbar.',
+
+    // Admin - Buttons
+    'btn_save' => 'Einstellungen Speichern',
+    'btn_add' => 'Hinzufügen',
+    'btn_enable' => 'Aktivieren',
+    'btn_disable' => 'Deaktivieren',
+    'btn_remove' => 'Entfernen',
+
+    // Admin - Eggs Section
+    'section_eggs' => 'Erlaubte Eggs',
+    'egg_select' => '-- Egg Auswählen --',
+    'egg_custom_name' => 'Eigener Name',
+    'egg_status_active' => 'Aktiv',
+    'egg_status_disabled' => 'Deaktiviert',
+    'eggs_none' => 'Noch keine Eggs hinzugefügt. Füge oben Eggs hinzu, um sie für kostenlose Server verfügbar zu machen.',
+    'eggs_confirm_remove' => 'Dieses Egg wirklich entfernen?',
+
+    // Admin - Per-User Limits
+    'section_user_limits' => 'Benutzerspezifische Limits',
+    'user_limits_help' => 'Lege individuelle Server-Limits für einzelne Benutzer fest. Benutzer ohne individuelles Limit nutzen das globale Limit (%s).',
+    'user_search' => 'Benutzer Suchen',
+    'user_search_placeholder' => 'Nach Benutzername oder E-Mail suchen...',
+    'user_selected' => 'Ausgewählter Benutzer',
+    'user_no_selected' => 'Kein Benutzer ausgewählt',
+    'user_max_servers' => 'Max. Server',
+    'user_add_limit' => 'Limit Hinzufügen',
+    'table_username' => 'Benutzername',
+    'table_email' => 'E-Mail',
+    'table_max_servers' => 'Max. Server',
+    'table_current' => 'Aktuell',
+    'table_status' => 'Status',
+    'table_actions' => 'Aktionen',
+    'status_blocked' => 'Blockiert',
+    'status_at_limit' => 'Am Limit',
+    'status_can_create' => 'Kann Erstellen',
+    'user_limits_none' => 'Keine individuellen Benutzer-Limits gesetzt. Alle Benutzer nutzen das globale Limit von <strong>%s</strong> Servern.',
+    'user_has_limit' => 'Hat Limit',
+    'user_limit_confirm_remove' => 'Individuelles Limit für %s entfernen? Dieser verwendet dann das globale Limit.',
+    'user_search_no_results' => 'Keine Benutzer gefunden',
+    'user_search_error' => 'Fehler beim Suchen von Benutzern',
+    'user_select_first' => 'Bitte zuerst einen Benutzer auswählen!',
+
+    // Admin - Alerts & Messages
+    'alert_db_error' => 'Datenbank-Tabellen nicht gefunden. Bitte ausführen: php artisan migrate',
+    'alert_settings_error' => 'Einstellungen konnten nicht geladen werden. Bitte Seite neu laden.',
+    'msg_success_save' => 'Einstellungen erfolgreich gespeichert!',
+    'msg_error_unknown' => 'Unbekannte Aktion.',
+    'msg_error_select_egg' => 'Bitte ein Egg auswählen!',
+    'msg_error_egg_exists' => 'Egg existiert bereits!',
+    'msg_success_egg_add' => 'Egg erfolgreich hinzugefügt!',
+    'msg_success_status' => 'Status geändert!',
+    'msg_success_egg_remove' => 'Egg erfolgreich entfernt!',
+    'msg_error_select_user' => 'Bitte einen Benutzer auswählen!',
+    'msg_error_negative' => 'Max. Server kann nicht negativ sein!',
+    'msg_error_user_not_found' => 'Benutzer nicht gefunden!',
+    'msg_error_limit_exists' => 'Benutzer hat bereits ein individuelles Limit!',
+    'msg_success_limit_set' => 'Individuelles Limit für %s gesetzt!',
+    'msg_error_limit_not_found' => 'Limit nicht gefunden!',
+    'msg_success_limit_update' => 'Limit erfolgreich aktualisiert!',
+    'msg_success_limit_remove' => '%s verwendet jetzt das globale Limit.',
+
+    // Client API - Error Messages
+    'api_disabled' => 'Kostenlose Server sind derzeit deaktiviert.',
+    'api_tables_missing' => 'Free Servers Tabellen nicht gefunden. Bitte php artisan migrate ausführen.',
+    'api_egg_not_available' => 'Dieses Egg ist nicht für kostenlose Server verfügbar.',
+    'api_node_not_available' => 'Diese Node ist nicht für kostenlose Server verfügbar.',
+    'api_limit_reached' => 'Du hast bereits die maximale Anzahl an kostenlosen Servern erreicht.',
+    'api_no_ports' => 'Keine freien Ports auf dieser Node verfügbar.',
+    'api_no_docker' => 'Kein Docker-Image für dieses Egg konfiguriert. Bitte kontaktiere einen Administrator.',
+    'api_success_create' => 'Server erfolgreich erstellt!',
+    'api_port_taken' => 'Der ausgewählte Port wurde belegt. Bitte erneut versuchen.',
+    'api_error_create' => 'Fehler beim Erstellen des Servers: %s',
+    'api_extension_disabled' => 'Server-Verlängerung ist nicht erlaubt.',
+    'api_server_not_found' => 'Server nicht gefunden oder nicht in deinem Besitz.',
+    'api_success_extend' => 'Server erfolgreich verlängert!',
+];

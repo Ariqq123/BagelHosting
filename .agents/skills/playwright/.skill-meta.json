@@ -1,0 +1,14 @@
+{
+  "libraryRepo": "Ariqq123/BagelHosting",
+  "sourceType": "github",
+  "source": "github",
+  "url": "https://github.com/openai/skills",
+  "repo": "openai/skills",
+  "ref": null,
+  "subpath": "skills/.curated/playwright",
+  "installSource": "openai/skills/skills/.curated/playwright",
+  "skillName": "playwright",
+  "scope": "project",
+  "installedAt": "2026-06-05T06:38:46.847Z",
+  "updatedAt": "2026-06-05T06:38:46.847Z"
+}
