@@ -92,6 +92,11 @@
                                 <i data-lucide="wand-2"></i><span>Arix Theme</span>
                             </a>
                         </li>
+                        <li class="{{ ! starts_with(Route::currentRouteName(), 'admin.logs') ?: 'active' }}">
+                            <a href="{{ route('admin.logs')}}">
+                                <i data-lucide="file-text"></i> <span>Logs</span>
+                            </a>
+                        </li>
                         <li class="{{ ! starts_with(Route::currentRouteName(), 'admin.api') ?: 'active' }}">
                             <a href="{{ route('admin.api.index')}}">
                                 <i data-lucide="webhook"></i> <span>Application API</span>
