@@ -26,9 +26,15 @@ class AuthenticationListener implements SubscribesToEvents
             foreach ($event->credentials as $key => $value) {
                 $activity = $activity->property($key, $value);
             }
+
+            // Separate log for non-password failures (blocked, suspended, rate limit, etc.)
+            $eventName = 'auth:fail';
+            if ($event->user && (method_exists($event->user, 'isSuspended') && $event->user->isSuspended())) {
+                $eventName = 'user:error';
+            }
         }
 
-        $activity->event($event instanceof Failed ? 'auth:fail' : 'auth:success')->log();
+        $activity->event($event instanceof Failed ? $eventName : 'auth:success')->log();
     }
 
     public function reset(PasswordReset $event): void
